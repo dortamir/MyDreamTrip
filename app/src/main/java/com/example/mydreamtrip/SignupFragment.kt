@@ -25,7 +25,7 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
             val password = etPassword.text.toString().trim()
 
             if (email.isBlank() || password.isBlank()) {
-                tvError.text = "Please fill all fields"
+                tvError.text = "Please fill email and password"
                 return@setOnClickListener
             }
 
@@ -38,6 +38,10 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
                 .addOnFailureListener { e ->
                     tvError.text = e.message ?: "Signup failed"
                 }
+        }
+
+        view.findViewById<TextView>(R.id.tvGoLogin).setOnClickListener {
+            findNavController().navigate(R.id.loginFragment)
         }
     }
 }
