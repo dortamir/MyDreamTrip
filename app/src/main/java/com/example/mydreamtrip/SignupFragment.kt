@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 
-class LoginFragment : Fragment(R.layout.fragment_login) {
+class SignupFragment : Fragment(R.layout.fragment_signup) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -18,31 +18,26 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
         val tvError = view.findViewById<TextView>(R.id.tvError)
 
-        view.findViewById<Button>(R.id.btnLogin).setOnClickListener {
+        view.findViewById<Button>(R.id.btnSignup).setOnClickListener {
             tvError.text = ""
 
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
             if (email.isBlank() || password.isBlank()) {
-                tvError.text = "Please fill email and password"
+                tvError.text = "Please fill all fields"
                 return@setOnClickListener
             }
 
             FirebaseAuth.getInstance()
-                .signInWithEmailAndPassword(email, password)
+                .createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
-                    val action = LoginFragmentDirections.actionLoginFragmentToMainFragment(email)
+                    val action = SignupFragmentDirections.actionSignupFragmentToMainFragment(email)
                     findNavController().navigate(action)
                 }
                 .addOnFailureListener { e ->
-                    tvError.text = e.message ?: "Login failed"
+                    tvError.text = e.message ?: "Signup failed"
                 }
-        }
-
-        view.findViewById<TextView>(R.id.tvGoSignup).setOnClickListener {
-            // צריך action ב-nav_graph: login -> signup
-            findNavController().navigate(R.id.signupFragment)
         }
     }
 }
