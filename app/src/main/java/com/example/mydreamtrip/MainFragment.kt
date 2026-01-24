@@ -14,6 +14,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         super.onViewCreated(view, savedInstanceState)
 
         view.findViewById<TextView>(R.id.txtHello).text =
-            "Hello, ${args.userName}"
+            "Hello, ${args.userEmail}"
+
     }
 }
