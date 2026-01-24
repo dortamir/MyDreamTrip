@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "762106434930",
+    "project_id": "mydreamtrip-9826e",
+    "storage_bucket": "mydreamtrip-9826e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:762106434930:android:9638893baf98d34698b9eb",
+        "android_client_info": {
+          "package_name": "com.example.mydreamtrip"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAB1tBFVi126by_q7a0YK89juBG0hEWmj0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

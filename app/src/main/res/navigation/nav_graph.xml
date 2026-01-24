@@ -6,31 +6,58 @@
     app:startDestination="@id/welcomeFragment">
 
     <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.example.mydreamtrip.WelcomeFragment"
+        android:label="fragment_welcome"
+        tools:layout="@layout/fragment_welcome">
+
+        <action
+            android:id="@+id/action_welcomeFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+
+        <action
+            android:id="@+id/action_welcomeFragment_to_signupFragment"
+            app:destination="@id/signupFragment" />
+    </fragment>
+
+    <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.mydreamtrip.LoginFragment"
         android:label="fragment_login"
-        tools:layout="@layout/fragment_login" >
+        tools:layout="@layout/fragment_login">
+
         <action
             android:id="@+id/action_loginFragment_to_mainFragment"
             app:destination="@id/mainFragment" />
     </fragment>
+
     <fragment
-        android:id="@+id/welcomeFragment"
-        android:name="com.example.mydreamtrip.WelcomeFragment"
-        android:label="fragment_welcome"
-        tools:layout="@layout/fragment_welcome" >
+        android:id="@+id/signupFragment"
+        android:name="com.example.mydreamtrip.SignupFragment"
+        android:label="fragment_signup"
+        tools:layout="@layout/fragment_signup">
+
         <action
-            android:id="@+id/action_welcomeFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
+            android:id="@+id/action_signupFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.example.mydreamtrip.MainFragment"
         android:label="fragment_main"
-        tools:layout="@layout/fragment_main" >
+        tools:layout="@layout/fragment_main">
+
         <argument
-            android:name="userName"
+            android:name="userEmail"
             app:argType="string"
-            android:defaultValue="Guest" />
+            android:defaultValue="" />
+
+        <action
+            android:id="@+id/action_mainFragment_to_welcomeFragment"
+            app:destination="@id/welcomeFragment"
+            app:popUpTo="@id/welcomeFragment"
+            app:popUpToInclusive="true" />
     </fragment>
+
 </navigation>
