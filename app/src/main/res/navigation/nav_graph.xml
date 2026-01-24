@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/welcomeFragment"
         android:name="com.example.mydreamtrip.WelcomeFragment"
-        android:label="fragment_welcome"
+        android:label="Welcome"
         tools:layout="@layout/fragment_welcome">
 
         <action
@@ -18,22 +18,17 @@
         <action
             android:id="@+id/action_welcomeFragment_to_signupFragment"
             app:destination="@id/signupFragment" />
-
-        <action
-            android:id="@+id/action_welcomeFragment_to_mainFragment"
-            app:destination="@id/mainFragment" />
-
     </fragment>
 
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.mydreamtrip.LoginFragment"
-        android:label="fragment_login"
+        android:label="Login"
         tools:layout="@layout/fragment_login">
 
         <action
-            android:id="@+id/action_loginFragment_to_mainFragment"
-            app:destination="@id/mainFragment" />
+            android:id="@+id/action_loginFragment_to_mainActivity"
+            app:destination="@id/mainActivity" />
 
         <action
             android:id="@+id/action_loginFragment_to_signupFragment"
@@ -44,30 +39,17 @@
     <fragment
         android:id="@+id/signupFragment"
         android:name="com.example.mydreamtrip.SignupFragment"
-        android:label="fragment_signup"
+        android:label="Signup"
         tools:layout="@layout/fragment_signup">
 
         <action
-            android:id="@+id/action_signupFragment_to_mainFragment"
-            app:destination="@id/mainFragment" />
+            android:id="@+id/action_signupFragment_to_mainActivity"
+            app:destination="@id/mainActivity" />
+
     </fragment>
 
-    <fragment
-        android:id="@+id/mainFragment"
-        android:name="com.example.mydreamtrip.MainFragment"
-        android:label="fragment_main"
-        tools:layout="@layout/fragment_main">
-
-        <argument
-            android:name="userEmail"
-            app:argType="string"
-            android:defaultValue="" />
-
-        <action
-            android:id="@+id/action_mainFragment_to_welcomeFragment"
-            app:destination="@id/welcomeFragment"
-            app:popUpTo="@id/welcomeFragment"
-            app:popUpToInclusive="true" />
-    </fragment>
-
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="com.example.mydreamtrip.MainActivity"
+        android:label="MainActivity" />
 </navigation>

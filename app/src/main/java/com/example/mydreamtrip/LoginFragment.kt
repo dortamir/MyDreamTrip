@@ -32,8 +32,9 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             FirebaseAuth.getInstance()
                 .signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
-                    val action = LoginFragmentDirections.actionLoginFragmentToMainFragment(email)
+                    val action = LoginFragmentDirections.actionLoginFragmentToMainActivity()
                     findNavController().navigate(action)
+
                 }
                 .addOnFailureListener { e ->
                     tvError.text = e.message ?: "Login failed"

@@ -6,6 +6,7 @@ import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
+import android.content.Intent
 
 class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
 
@@ -14,11 +15,10 @@ class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
 
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
-            val email = user.email ?: ""
-            val action =
-                WelcomeFragmentDirections
-                    .actionWelcomeFragmentToMainFragment(email)
-            findNavController().navigate(action)
+            val intent = Intent(requireContext(), MainActivity::class.java)
+            intent.putExtra("userEmail", user.email ?: "")
+            startActivity(intent)
+            requireActivity().finish()
             return
         }
 
