@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_graph"
+    app:startDestination="@id/exploreFragment">
+
+    <fragment
+        android:id="@+id/exploreFragment"
+        android:name="com.example.mydreamtrip.ui.explore.ExploreFragment"
+        android:label="Explore" />
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.example.mydreamtrip.PlaceholderFragment"
+        android:label="Search" />
+
+    <fragment
+        android:id="@+id/addFragment"
+        android:name="com.example.mydreamtrip.PlaceholderFragment"
+        android:label="Add" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.mydreamtrip.PlaceholderFragment"
+        android:label="Profile" />
+
+</navigation>
