@@ -11,10 +11,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mydreamtrip.model.Comment
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
 
     private lateinit var commentAdapter: CommentAdapter
+    private val db by lazy { FirebaseFirestore.getInstance() }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -27,17 +31,39 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
         view.findViewById<TextView>(R.id.txtDetailsAuthor).text = args.author
         view.findViewById<ImageView>(R.id.imgDetails).setImageResource(args.imageRes)
 
+        val postRef = db.collection("posts").document(args.postId)
+        postRef.set(
+            mapOf(
+                "title" to args.title,
+                "location" to args.location,
+                "ratingText" to args.ratingText,
+                "author" to args.author,
+                "imageRes" to args.imageRes,
+                "updatedAt" to FieldValue.serverTimestamp()
+            ),
+            com.google.firebase.firestore.SetOptions.merge()
+        )
+
         val rv = view.findViewById<RecyclerView>(R.id.rvComments)
         rv.layoutManager = LinearLayoutManager(requireContext())
 
-        val initial = mutableListOf(
-            Comment("Noa", "Looks amazing 😍"),
-            Comment("Yuval", "Need to try this soon!"),
-            Comment("Dor", "Saving it for my next trip ✈️")
-        )
-
-        commentAdapter = CommentAdapter(initial)
+        commentAdapter = CommentAdapter(mutableListOf())
         rv.adapter = commentAdapter
+
+        postRef.collection("comments")
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
+
+                val list = snapshot.documents.mapNotNull { doc ->
+                    val author = doc.getString("author") ?: return@mapNotNull null
+                    val text = doc.getString("text") ?: return@mapNotNull null
+                    Comment(author, text)
+                }
+
+                commentAdapter = CommentAdapter(list.toMutableList())
+                rv.adapter = commentAdapter
+            }
 
         val etComment = view.findViewById<EditText>(R.id.etComment)
         val btnAdd = view.findViewById<Button>(R.id.btnAddComment)
@@ -46,12 +72,18 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
             val text = etComment.text.toString().trim()
             if (text.isBlank()) return@setOnClickListener
 
-            val userEmail = FirebaseAuth.getInstance().currentUser?.email ?: "Guest"
-            val author = userEmail.substringBefore("@") // שם קצר
+            val email = FirebaseAuth.getInstance().currentUser?.email ?: "Guest"
+            val author = email.substringBefore("@")
 
-            commentAdapter.addComment(Comment(author, text))
-            rv.scrollToPosition(0)
-            etComment.setText("")
+            postRef.collection("comments").add(
+                mapOf(
+                    "author" to author,
+                    "text" to text,
+                    "createdAt" to FieldValue.serverTimestamp()
+                )
+            ).addOnSuccessListener {
+                etComment.setText("")
+            }
         }
     }
 }
