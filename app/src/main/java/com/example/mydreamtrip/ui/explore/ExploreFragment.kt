@@ -16,14 +16,13 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
     private lateinit var adapter: DestinationAdapter
 
     private val all = listOf(
-        Destination(title = "Santorini Sunset Views", location = "Santorini, Greece", ratingText = "⭐ 4.8 (234)", author = "Shani Attias", imageRes = R.drawable.ic_placeholder),
-        Destination(title = "Tokyo Street Food Tour", location = "Tokyo, Japan", ratingText = "⭐ 4.9 (456)", author = "Yuval Kot", imageRes = R.drawable.ic_placeholder),
-        Destination(title = "Swiss Alps Hiking", location = "Zermatt, Switzerland", ratingText = "⭐ 4.7 (189)", author = "Dor Tamir", imageRes = R.drawable.ic_placeholder),
-        Destination(title = "Italian Pasta Night", location = "Rome, Italy", ratingText = "⭐ 4.6 (98)", author = "Noa Levi", imageRes = R.drawable.ic_placeholder),
-        Destination(title = "Desert Jeep Adventure", location = "Dubai, UAE", ratingText = "⭐ 4.9 (301)", author = "Roni Amir", imageRes = R.drawable.ic_placeholder),
-        Destination(title = "Mountain Cabin Escape", location = "Banff, Canada", ratingText = "⭐ 4.8 (210)", author = "Lior Cohen", imageRes = R.drawable.ic_placeholder)
+        Destination("post_santorini", "Santorini Sunset Views", "Santorini, Greece", "⭐ 4.8 (234)", "Shani Attias", android.R.drawable.ic_menu_gallery),
+        Destination("post_tokyo", "Tokyo Street Food Tour", "Tokyo, Japan", "⭐ 4.9 (456)", "Yuval Kot", android.R.drawable.ic_menu_gallery),
+        Destination("post_alps", "Swiss Alps Hiking", "Zermatt, Switzerland", "⭐ 4.7 (189)", "Dor Tamir", android.R.drawable.ic_menu_gallery),
+        Destination("post_rome", "Italian Pasta Night", "Rome, Italy", "⭐ 4.6 (98)", "Noa Levi", android.R.drawable.ic_menu_gallery),
+        Destination("post_dubai", "Desert Jeep Adventure", "Dubai, UAE", "⭐ 4.9 (301)", "Roni Amir", android.R.drawable.ic_menu_gallery),
+        Destination("post_banff", "Mountain Cabin Escape", "Banff, Canada", "⭐ 4.8 (210)", "Lior Cohen", android.R.drawable.ic_menu_gallery)
     )
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -34,6 +33,7 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
         adapter = DestinationAdapter(all) { dest ->
             val action = ExploreFragmentDirections
                 .actionExploreFragmentToPostDetailsFragment(
+                    dest.id,
                     dest.title,
                     dest.location,
                     dest.ratingText,
@@ -41,6 +41,7 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
                     dest.imageRes
                 )
             findNavController().navigate(action)
+
         }
 
         rv.adapter = adapter
