@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Login"
+        android:text="Sign Up"
         android:textSize="22sp"
         android:paddingBottom="16dp" />
 
@@ -29,17 +29,17 @@
         android:layout_marginTop="10dp" />
 
     <Button
-        android:id="@+id/btnLogin"
+        android:id="@+id/btnSignup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Login"
+        android:text="Create account"
         android:layout_marginTop="16dp" />
 
     <TextView
-        android:id="@+id/tvGoSignup"
+        android:id="@+id/tvGoLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No account? Sign up"
+        android:text="Already have an account? Login"
         android:layout_marginTop="12dp" />
 
     <TextView

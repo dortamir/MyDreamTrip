@@ -11,11 +11,18 @@
         android:layout_height="wrap_content"
         android:text="Welcome to MyDreamTrip"
         android:textSize="20sp"
-        android:paddingBottom="16dp"/>
+        android:paddingBottom="24dp"/>
 
     <Button
         android:id="@+id/btnGoLogin"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Go to Login" />
+        android:text="Login" />
+
+    <Button
+        android:id="@+id/btnGoSignup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Create account"
+        android:layout_marginTop="12dp" />
 </LinearLayout>
