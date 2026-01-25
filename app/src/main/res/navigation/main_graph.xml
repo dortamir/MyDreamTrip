@@ -11,6 +11,11 @@
         android:label="Explore"
         tools:layout="@layout/fragment_explore" />
 
+    <action
+        android:id="@+id/action_exploreFragment_to_postDetailsFragment"
+        app:destination="@id/postDetailsFragment" />
+
+
     <fragment
         android:id="@+id/addFragment"
         android:name="com.example.mydreamtrip.AddFragment"
@@ -22,4 +27,31 @@
         android:name="com.example.mydreamtrip.ProfileFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/postDetailsFragment"
+        android:name="com.example.mydreamtrip.PostDetailsFragment"
+        android:label="PostDetails">
+
+        <argument
+            android:name="title"
+            app:argType="string" />
+
+        <argument
+            android:name="location"
+            app:argType="string" />
+
+        <argument
+            android:name="ratingText"
+            app:argType="string" />
+
+        <argument
+            android:name="author"
+            app:argType="string" />
+
+        <argument
+            android:name="imageRes"
+            app:argType="integer" />
+    </fragment>
+
 </navigation>
