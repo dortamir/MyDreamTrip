@@ -9,7 +9,8 @@ import com.example.mydreamtrip.R
 import com.example.mydreamtrip.model.Destination
 
 class DestinationAdapter(
-    private var items: List<Destination>
+    private var items: List<Destination>,
+    private val onClick: (Destination) -> Unit
 ) : RecyclerView.Adapter<DestinationAdapter.VH>() {
 
     class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -31,6 +32,7 @@ class DestinationAdapter(
         holder.location.text = item.location
         holder.rating.text = item.ratingText
         holder.author.text = item.author
+        holder.itemView.setOnClickListener { onClick(item) }
     }
 
     override fun getItemCount(): Int = items.size

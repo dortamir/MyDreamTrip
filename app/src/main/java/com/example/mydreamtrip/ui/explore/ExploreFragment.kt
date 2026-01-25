@@ -9,6 +9,7 @@ import com.example.mydreamtrip.R
 import com.example.mydreamtrip.model.Destination
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import androidx.navigation.fragment.findNavController
 
 class ExploreFragment : Fragment(R.layout.fragment_explore) {
 
@@ -30,7 +31,18 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
         val rv = view.findViewById<RecyclerView>(R.id.rvDestinations)
         rv.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        adapter = DestinationAdapter(all)
+        adapter = DestinationAdapter(all) { dest ->
+            val action = ExploreFragmentDirections
+                .actionExploreFragmentToPostDetailsFragment(
+                    dest.title,
+                    dest.location,
+                    dest.ratingText,
+                    dest.author,
+                    dest.imageRes
+                )
+            findNavController().navigate(action)
+        }
+
         rv.adapter = adapter
 
         val chipGroup = view.findViewById<ChipGroup>(R.id.chipGroup)
