@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
+import android.content.Intent
 
 class SignupFragment : Fragment(R.layout.fragment_signup) {
 
@@ -32,8 +33,11 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
             FirebaseAuth.getInstance()
                 .createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
-                    val action = SignupFragmentDirections.actionSignupFragmentToMainFragment(email)
-                    findNavController().navigate(action)
+                    val intent = Intent(requireContext(), MainActivity::class.java)
+                    intent.putExtra("userEmail", email) // אופציונלי אם תרצי להשתמש במייל
+                    startActivity(intent)
+                    requireActivity().finish()
+
                 }
                 .addOnFailureListener { e ->
                     tvError.text = e.message ?: "Signup failed"
