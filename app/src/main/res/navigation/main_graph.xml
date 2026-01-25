@@ -9,12 +9,12 @@
         android:id="@+id/exploreFragment"
         android:name="com.example.mydreamtrip.ui.explore.ExploreFragment"
         android:label="Explore"
-        tools:layout="@layout/fragment_explore" />
+        tools:layout="@layout/fragment_explore" >
 
-    <action
-        android:id="@+id/action_exploreFragment_to_postDetailsFragment"
-        app:destination="@id/postDetailsFragment" />
-
+        <action
+            android:id="@+id/action_exploreFragment_to_postDetailsFragment"
+            app:destination="@id/postDetailsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/addFragment"

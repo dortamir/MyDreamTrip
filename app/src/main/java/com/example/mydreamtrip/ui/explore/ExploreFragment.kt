@@ -2,27 +2,24 @@ package com.example.mydreamtrip.ui.explore
 
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
+import com.example.mydreamtrip.R
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mydreamtrip.R
 import com.example.mydreamtrip.model.Destination
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import androidx.navigation.fragment.findNavController
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class ExploreFragment : Fragment(R.layout.fragment_explore) {
 
     private lateinit var adapter: DestinationAdapter
+    private val db by lazy { FirebaseFirestore.getInstance() }
 
-    private val all = listOf(
-        Destination("post_santorini", "Santorini Sunset Views", "Santorini, Greece", "⭐ 4.8 (234)", "Shani Attias", android.R.drawable.ic_menu_gallery),
-        Destination("post_tokyo", "Tokyo Street Food Tour", "Tokyo, Japan", "⭐ 4.9 (456)", "Yuval Kot", android.R.drawable.ic_menu_gallery),
-        Destination("post_alps", "Swiss Alps Hiking", "Zermatt, Switzerland", "⭐ 4.7 (189)", "Dor Tamir", android.R.drawable.ic_menu_gallery),
-        Destination("post_rome", "Italian Pasta Night", "Rome, Italy", "⭐ 4.6 (98)", "Noa Levi", android.R.drawable.ic_menu_gallery),
-        Destination("post_dubai", "Desert Jeep Adventure", "Dubai, UAE", "⭐ 4.9 (301)", "Roni Amir", android.R.drawable.ic_menu_gallery),
-        Destination("post_banff", "Mountain Cabin Escape", "Banff, Canada", "⭐ 4.8 (210)", "Lior Cohen", android.R.drawable.ic_menu_gallery)
-    )
+    private var all: List<Destination> = emptyList()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -30,7 +27,7 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
         val rv = view.findViewById<RecyclerView>(R.id.rvDestinations)
         rv.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        adapter = DestinationAdapter(all) { dest ->
+        adapter = DestinationAdapter(emptyList()) { dest ->
             val action = ExploreFragmentDirections
                 .actionExploreFragmentToPostDetailsFragment(
                     dest.id,
@@ -41,10 +38,11 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
                     dest.imageRes
                 )
             findNavController().navigate(action)
-
         }
-
         rv.adapter = adapter
+
+        val txtCount = view.findViewById<TextView>(R.id.txtCount)
+        fun updateCount(n: Int) { txtCount.text = "$n posts" }
 
         val chipGroup = view.findViewById<ChipGroup>(R.id.chipGroup)
         val chipAll = view.findViewById<Chip>(R.id.chipAll)
@@ -56,19 +54,35 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
             val filtered = when (selectedId) {
                 chipFood.id -> all.filter { it.title.contains("Food", true) || it.title.contains("Pasta", true) }
                 chipAdventure.id -> all.filter {
-                    it.title.contains("Adventure", true) ||
-                            it.title.contains("Hiking", true) ||
-                            it.title.contains("Jeep", true)
+                    it.title.contains("Adventure", true) || it.title.contains("Hiking", true) || it.title.contains("Jeep", true)
                 }
                 else -> all
             }
             adapter.submitList(filtered)
+            updateCount(filtered.size)
         }
 
         chipAll.setOnClickListener { applyFilter() }
         chipFood.setOnClickListener { applyFilter() }
         chipAdventure.setOnClickListener { applyFilter() }
 
-        applyFilter()
+        db.collection("posts")
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
+
+                all = snapshot.documents.map { doc ->
+                    Destination(
+                        id = doc.id,
+                        title = doc.getString("title") ?: "",
+                        location = doc.getString("location") ?: "",
+                        ratingText = doc.getString("ratingText") ?: "⭐ 0.0 (0)",
+                        author = doc.getString("author") ?: "Guest",
+                        imageRes = (doc.getLong("imageRes") ?: android.R.drawable.ic_menu_gallery.toLong()).toInt()
+                    )
+                }
+
+                applyFilter()
+            }
     }
 }
