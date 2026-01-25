@@ -7,6 +7,6 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add"
-        android:textSize="22sp" />
+        android:text="Add (Coming soon)"
+        android:textSize="20sp" />
 </FrameLayout>

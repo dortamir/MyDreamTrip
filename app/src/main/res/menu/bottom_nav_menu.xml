@@ -7,11 +7,6 @@
         android:icon="@android:drawable/ic_menu_compass" />
 
     <item
-        android:id="@+id/searchFragment"
-        android:title="Search"
-        android:icon="@android:drawable/ic_menu_search" />
-
-    <item
         android:id="@+id/addFragment"
         android:title="Add"
         android:icon="@android:drawable/ic_input_add" />

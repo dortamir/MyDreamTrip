@@ -12,12 +12,6 @@
         tools:layout="@layout/fragment_explore" />
 
     <fragment
-        android:id="@+id/searchFragment"
-        android:name="com.example.mydreamtrip.SearchFragment"
-        android:label="Search"
-        tools:layout="@layout/fragment_search" />
-
-    <fragment
         android:id="@+id/addFragment"
         android:name="com.example.mydreamtrip.AddFragment"
         android:label="Add"
