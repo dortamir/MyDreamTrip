@@ -15,13 +15,14 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
     private lateinit var adapter: DestinationAdapter
 
     private val all = listOf(
-        Destination("Santorini Sunset Views", "Santorini, Greece", "⭐ 4.8 (234)", "Shani Attias"),
-        Destination("Tokyo Street Food Tour", "Tokyo, Japan", "⭐ 4.9 (456)", "Yuval Kot"),
-        Destination("Swiss Alps Hiking", "Zermatt, Switzerland", "⭐ 4.7 (189)", "Dor Tamir"),
-        Destination("Italian Pasta Night", "Rome, Italy", "⭐ 4.6 (98)", "Noa Levi"),
-        Destination("Desert Jeep Adventure", "Dubai, UAE", "⭐ 4.9 (301)", "Roni Amir"),
-        Destination("Mountain Cabin Escape", "Banff, Canada", "⭐ 4.8 (210)", "Lior Cohen")
+        Destination(title = "Santorini Sunset Views", location = "Santorini, Greece", ratingText = "⭐ 4.8 (234)", author = "Shani Attias", imageRes = R.drawable.ic_placeholder),
+        Destination(title = "Tokyo Street Food Tour", location = "Tokyo, Japan", ratingText = "⭐ 4.9 (456)", author = "Yuval Kot", imageRes = R.drawable.ic_placeholder),
+        Destination(title = "Swiss Alps Hiking", location = "Zermatt, Switzerland", ratingText = "⭐ 4.7 (189)", author = "Dor Tamir", imageRes = R.drawable.ic_placeholder),
+        Destination(title = "Italian Pasta Night", location = "Rome, Italy", ratingText = "⭐ 4.6 (98)", author = "Noa Levi", imageRes = R.drawable.ic_placeholder),
+        Destination(title = "Desert Jeep Adventure", location = "Dubai, UAE", ratingText = "⭐ 4.9 (301)", author = "Roni Amir", imageRes = R.drawable.ic_placeholder),
+        Destination(title = "Mountain Cabin Escape", location = "Banff, Canada", ratingText = "⭐ 4.8 (210)", author = "Lior Cohen", imageRes = R.drawable.ic_placeholder)
     )
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -51,12 +52,10 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
             adapter.submitList(filtered)
         }
 
-        // כדי שלא יהיה תלוי באם ה־ChipGroup קורא onCheckedChangeListener
         chipAll.setOnClickListener { applyFilter() }
         chipFood.setOnClickListener { applyFilter() }
         chipAdventure.setOnClickListener { applyFilter() }
 
-        // ברירת מחדל
         applyFilter()
     }
 }
