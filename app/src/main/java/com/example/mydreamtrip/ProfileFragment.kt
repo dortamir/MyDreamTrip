@@ -6,23 +6,25 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mydreamtrip.model.Destination
+import com.example.mydreamtrip.data.repo.PostsRepository
 import com.example.mydreamtrip.ui.explore.DestinationAdapter
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.QuerySnapshot
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
-    private val db by lazy { FirebaseFirestore.getInstance() }
     private lateinit var adapter: DestinationAdapter
+    private lateinit var repo: PostsRepository
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        repo = PostsRepository(requireContext())
 
         val txtEmail = view.findViewById<TextView>(R.id.txtEmail)
         val btnSignOut = view.findViewById<Button>(R.id.btnSignOut)
@@ -62,31 +64,15 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         val author = email.substringBefore("@")
 
-        db.collection("posts")
-            .whereEqualTo("author", author)
-            .addSnapshotListener { snap: QuerySnapshot?, err: FirebaseFirestoreException? ->
+        repo.startSyncExplorePosts()
 
-                if (err != null || snap == null) {
-                    tvEmpty.visibility = View.VISIBLE
-                    tvEmpty.text = err?.message ?: "Failed to load posts"
-                    return@addSnapshotListener
-                }
-
-                val items = snap.documents.map { doc ->
-                    Destination(
-                        id = doc.id,
-                        title = doc.getString("title") ?: "",
-                        location = doc.getString("location") ?: "",
-                        ratingText = doc.getString("ratingText") ?: "⭐ 0.0 (0)",
-                        author = doc.getString("author") ?: "Guest",
-                        imageRes = (doc.getLong("imageRes") ?: android.R.drawable.ic_menu_gallery.toLong()).toInt(),
-                        localImageUri = doc.getString("localImageUri")
-                    )
-                }
-
+        viewLifecycleOwner.lifecycleScope.launch {
+            repo.observeMyPosts(author).collectLatest { items ->
                 tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+                tvEmpty.text = "No posts yet"
                 adapter.submitList(items)
             }
+        }
 
         btnSignOut.setOnClickListener {
             FirebaseAuth.getInstance().signOut()

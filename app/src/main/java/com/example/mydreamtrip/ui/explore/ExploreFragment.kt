@@ -4,25 +4,29 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mydreamtrip.R
+import com.example.mydreamtrip.data.repo.PostsRepository
 import com.example.mydreamtrip.model.Destination
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class ExploreFragment : Fragment(R.layout.fragment_explore) {
 
     private lateinit var adapter: DestinationAdapter
-    private val db by lazy { FirebaseFirestore.getInstance() }
+    private lateinit var repo: PostsRepository
 
     private var all: List<Destination> = emptyList()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        repo = PostsRepository(requireContext())
 
         val rv = view.findViewById<RecyclerView>(R.id.rvDestinations)
         rv.layoutManager = GridLayoutManager(requireContext(), 2)
@@ -43,7 +47,6 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
                 findNavController().navigate(action)
             }
         )
-
         rv.adapter = adapter
 
         val txtCount = view.findViewById<TextView>(R.id.txtCount)
@@ -59,7 +62,9 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
             val filtered = when (selectedId) {
                 chipFood.id -> all.filter { it.title.contains("Food", true) || it.title.contains("Pasta", true) }
                 chipAdventure.id -> all.filter {
-                    it.title.contains("Adventure", true) || it.title.contains("Hiking", true) || it.title.contains("Jeep", true)
+                    it.title.contains("Adventure", true) ||
+                            it.title.contains("Hiking", true) ||
+                            it.title.contains("Jeep", true)
                 }
                 else -> all
             }
@@ -71,25 +76,13 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
         chipFood.setOnClickListener { applyFilter() }
         chipAdventure.setOnClickListener { applyFilter() }
 
-        db.collection("posts")
-            .orderBy("createdAt", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null || snapshot == null) return@addSnapshotListener
+        repo.startSyncExplorePosts()
 
-                all = snapshot.documents.map { doc ->
-                    Destination(
-                        id = doc.id,
-                        title = doc.getString("title") ?: "",
-                        location = doc.getString("location") ?: "",
-                        ratingText = doc.getString("ratingText") ?: "⭐ 0.0 (0)",
-                        author = doc.getString("author") ?: "Guest",
-                        imageRes = (doc.getLong("imageRes") ?: android.R.drawable.ic_menu_gallery.toLong()).toInt(),
-                        localImageUri = doc.getString("localImageUri")
-                    )
-
-                }
-
+        viewLifecycleOwner.lifecycleScope.launch {
+            repo.observeExplore().collectLatest { list ->
+                all = list
                 applyFilter()
             }
+        }
     }
 }
