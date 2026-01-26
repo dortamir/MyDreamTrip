@@ -3,6 +3,7 @@ package com.example.mydreamtrip.ui.explore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -11,7 +12,8 @@ import com.example.mydreamtrip.model.Destination
 
 class DestinationAdapter(
     private var items: List<Destination>,
-    private val onClick: (Destination) -> Unit
+    private val onClick: (Destination) -> Unit,
+    private val onDelete: ((Destination) -> Unit)? = null
 ) : RecyclerView.Adapter<DestinationAdapter.VH>() {
 
     class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -20,6 +22,9 @@ class DestinationAdapter(
         val location: TextView = itemView.findViewById(R.id.txtLocation)
         val rating: TextView = itemView.findViewById(R.id.txtRating)
         val author: TextView = itemView.findViewById(R.id.txtAuthor)
+
+        // NEW
+        val btnDelete: ImageButton = itemView.findViewById(R.id.btnDelete)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -36,6 +41,15 @@ class DestinationAdapter(
         holder.imgCover.setImageResource(item.imageRes)
 
         holder.itemView.setOnClickListener { onClick(item) }
+
+        // NEW: show/hide delete button depending on onDelete presence
+        if (onDelete != null) {
+            holder.btnDelete.visibility = View.VISIBLE
+            holder.btnDelete.setOnClickListener { onDelete.invoke(item) }
+        } else {
+            holder.btnDelete.visibility = View.GONE
+            holder.btnDelete.setOnClickListener(null)
+        }
     }
 
     override fun getItemCount(): Int = items.size
