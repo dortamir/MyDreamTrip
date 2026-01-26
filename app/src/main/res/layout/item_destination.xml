@@ -13,31 +13,13 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- TOP AREA: Image + Delete Button overlay -->
-        <FrameLayout
+        <ImageView
+            android:id="@+id/imgCover"
             android:layout_width="match_parent"
-            android:layout_height="120dp">
-
-            <ImageView
-                android:id="@+id/imgCover"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:contentDescription="@null"
-                android:src="@android:drawable/ic_menu_gallery" />
-
-            <ImageButton
-                android:id="@+id/btnDelete"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="top|end"
-                android:layout_margin="8dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="Delete"
-                android:padding="8dp"
-                android:src="@android:drawable/ic_menu_delete"
-                android:visibility="gone" />
-        </FrameLayout>
+            android:layout_height="120dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="@null"
+            android:src="@android:drawable/ic_menu_gallery"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -49,18 +31,18 @@
                 android:id="@+id/txtCardTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Santorini Sunset Views"
+                android:text="Title"
                 android:textStyle="bold"
                 android:textSize="16sp"
-                android:maxLines="2" />
+                android:maxLines="2"/>
 
             <TextView
                 android:id="@+id/txtLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Santorini, Greece"
+                android:text="Location"
                 android:textSize="13sp"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="4dp"/>
 
             <TextView
                 android:id="@+id/txtRating"
@@ -68,15 +50,15 @@
                 android:layout_height="wrap_content"
                 android:text="⭐ 4.8 (234)"
                 android:textSize="13sp"
-                android:layout_marginTop="6dp" />
+                android:layout_marginTop="6dp"/>
 
             <TextView
                 android:id="@+id/txtAuthor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Shani Attias"
+                android:text="author"
                 android:textSize="12sp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"/>
 
         </LinearLayout>
 

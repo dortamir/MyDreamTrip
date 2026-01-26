@@ -4,9 +4,13 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mydreamtrip.model.Comment
@@ -31,22 +35,55 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
         view.findViewById<TextView>(R.id.txtDetailsAuthor).text = args.author
         view.findViewById<ImageView>(R.id.imgDetails).setImageResource(args.imageRes)
 
+        val btnDelete = view.findViewById<ImageButton>(R.id.btnDeletePost)
+        val btnEdit = view.findViewById<ImageButton>(R.id.btnEditPost)
+        val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
+
+        btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
+        val currentEmail = FirebaseAuth.getInstance().currentUser?.email
+        val currentUsername = currentEmail?.substringBefore("@")
+        val isOwner = !currentUsername.isNullOrBlank() && currentUsername.equals(args.author, ignoreCase = true)
+
+        btnDelete.visibility = if (isOwner) View.VISIBLE else View.GONE
+        btnEdit.visibility = if (isOwner) View.VISIBLE else View.GONE
+
         val postRef = db.collection("posts").document(args.postId)
-        postRef.set(
-            mapOf(
-                "title" to args.title,
-                "location" to args.location,
-                "ratingText" to args.ratingText,
-                "author" to args.author,
-                "imageRes" to args.imageRes,
-                "updatedAt" to FieldValue.serverTimestamp()
-            ),
-            com.google.firebase.firestore.SetOptions.merge()
-        )
+
+        btnDelete.setOnClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Delete post?")
+                .setMessage("Are you sure you want to delete this post?")
+                .setPositiveButton("Delete") { _, _ ->
+                    postRef.delete()
+                        .addOnSuccessListener {
+                            Toast.makeText(requireContext(), "Post deleted", Toast.LENGTH_SHORT).show()
+                            findNavController().popBackStack()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(requireContext(), e.message ?: "Delete failed", Toast.LENGTH_LONG).show()
+                        }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
+        btnEdit.setOnClickListener {
+            val action = PostDetailsFragmentDirections
+                .actionPostDetailsFragmentToEditPostFragment(
+                    postId = args.postId,
+                    title = args.title,
+                    location = args.location,
+                    ratingText = args.ratingText,
+                    imageRes = args.imageRes
+                )
+            findNavController().navigate(action)
+        }
 
         val rv = view.findViewById<RecyclerView>(R.id.rvComments)
         rv.layoutManager = LinearLayoutManager(requireContext())
-
         commentAdapter = CommentAdapter(mutableListOf())
         rv.adapter = commentAdapter
 

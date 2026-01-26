@@ -26,12 +26,22 @@
         android:id="@+id/profileFragment"
         android:name="com.example.mydreamtrip.ProfileFragment"
         android:label="Profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile">
+
+        <action
+            android:id="@+id/action_profileFragment_to_postDetailsFragment"
+            app:destination="@id/postDetailsFragment" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/postDetailsFragment"
         android:name="com.example.mydreamtrip.PostDetailsFragment"
         android:label="PostDetails">
+
+        <action
+            android:id="@+id/action_postDetailsFragment_to_editPostFragment"
+            app:destination="@id/editPostFragment" />
 
         <argument
             android:name="postId"
@@ -56,7 +66,40 @@
         <argument
             android:name="imageRes"
             app:argType="integer" />
+        <argument
+            android:name="imageUrl"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
 
     </fragment>
+
+    <fragment
+        android:id="@+id/editPostFragment"
+        android:name="com.example.mydreamtrip.EditPostFragment"
+        android:label="Edit Post"
+        tools:layout="@layout/fragment_edit_post">
+
+        <argument
+            android:name="postId"
+            app:argType="string" />
+
+        <argument
+            android:name="title"
+            app:argType="string" />
+
+        <argument
+            android:name="location"
+            app:argType="string" />
+
+        <argument
+            android:name="ratingText"
+            app:argType="string" />
+
+        <argument
+            android:name="imageRes"
+            app:argType="integer" />
+    </fragment>
+
 
 </navigation>
