@@ -6,6 +6,6 @@ data class Destination(
     val location: String,
     val ratingText: String,
     val author: String,
-    val imageRes: Int = android.R.drawable.ic_menu_gallery,
-    val imageUrl: String? = null
+    val imageRes: Int,
+    val localImageUri: String? = null
 )

@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
+import android.content.Intent
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
 
@@ -35,6 +36,10 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                     val action = LoginFragmentDirections.actionLoginFragmentToMainActivity()
                     findNavController().navigate(action)
 
+                    val intent = Intent(requireContext(), MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    requireActivity().finish()
                 }
                 .addOnFailureListener { e ->
                     tvError.text = e.message ?: "Login failed"
@@ -42,7 +47,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         }
 
         view.findViewById<TextView>(R.id.tvGoSignup).setOnClickListener {
-            // צריך action ב-nav_graph: login -> signup
             findNavController().navigate(R.id.signupFragment)
         }
     }
