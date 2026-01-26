@@ -3,11 +3,11 @@ package com.example.mydreamtrip.ui.explore
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import com.example.mydreamtrip.R
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mydreamtrip.R
 import com.example.mydreamtrip.model.Destination
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -37,7 +37,8 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
                         location = dest.location,
                         ratingText = dest.ratingText,
                         author = dest.author,
-                        imageRes = dest.imageRes
+                        imageRes = dest.imageRes,
+                        imageUrl = dest.imageUrl
                     )
                 findNavController().navigate(action)
             }
@@ -82,7 +83,8 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
                         location = doc.getString("location") ?: "",
                         ratingText = doc.getString("ratingText") ?: "⭐ 0.0 (0)",
                         author = doc.getString("author") ?: "Guest",
-                        imageRes = (doc.getLong("imageRes") ?: android.R.drawable.ic_menu_gallery.toLong()).toInt()
+                        imageRes = (doc.getLong("imageRes") ?: android.R.drawable.ic_menu_gallery.toLong()).toInt(),
+                        imageUrl = doc.getString("imageUrl")
                     )
                 }
 

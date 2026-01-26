@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mydreamtrip.R
 import com.example.mydreamtrip.model.Destination
+import com.bumptech.glide.Glide
 
 class DestinationAdapter(
     private var items: List<Destination>,
@@ -36,6 +37,16 @@ class DestinationAdapter(
         holder.rating.text = item.ratingText
         holder.author.text = item.author
         holder.imgCover.setImageResource(item.imageRes)
+
+        if (!item.imageUrl.isNullOrBlank()) {
+            Glide.with(holder.itemView)
+                .load(item.imageUrl)
+                .placeholder(android.R.drawable.ic_menu_gallery)
+                .error(android.R.drawable.ic_menu_gallery)
+                .into(holder.imgCover)
+        } else {
+            holder.imgCover.setImageResource(item.imageRes)
+        }
 
         holder.itemView.setOnClickListener { onClick(item) }
     }

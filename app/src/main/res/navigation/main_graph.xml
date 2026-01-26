@@ -66,6 +66,11 @@
         <argument
             android:name="imageRes"
             app:argType="integer" />
+        <argument
+            android:name="imageUrl"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
 
     </fragment>
 

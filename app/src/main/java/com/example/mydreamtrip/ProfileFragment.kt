@@ -45,7 +45,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                         location = dest.location,
                         ratingText = dest.ratingText,
                         author = dest.author,
-                        imageRes = dest.imageRes
+                        imageRes = dest.imageRes,
+                        imageUrl = dest.imageUrl
                     )
                 findNavController().navigate(action)
             }
@@ -78,8 +79,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                         location = doc.getString("location") ?: "",
                         ratingText = doc.getString("ratingText") ?: "",
                         author = doc.getString("author") ?: "",
-                        imageRes = (doc.getLong("imageRes")
-                            ?: android.R.drawable.ic_menu_gallery.toLong()).toInt()
+                        imageRes = (doc.getLong("imageRes") ?: android.R.drawable.ic_menu_gallery.toLong()).toInt(),
+                        imageUrl = doc.getString("imageUrl")
                     )
                 }
 
@@ -87,7 +88,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 adapter.submitList(items)
             }
 
-        // Sign out
         btnSignOut.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
             val intent = Intent(requireContext(), AuthActivity::class.java)
