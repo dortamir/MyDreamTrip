@@ -1,59 +1,61 @@
 package com.example.mydreamtrip
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [EditPostFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class EditPostFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private val db by lazy { FirebaseFirestore.getInstance() }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_edit_post, container, false)
-    }
+        val args = EditPostFragmentArgs.fromBundle(requireArguments())
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment EditPostFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            EditPostFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+        val etTitle = view.findViewById<EditText>(R.id.etEditTitle)
+        val etLocation = view.findViewById<EditText>(R.id.etEditLocation)
+        val etRating = view.findViewById<EditText>(R.id.etEditRating)
+        val btnSave = view.findViewById<Button>(R.id.btnSaveEdit)
+
+        // Prefill
+        etTitle.setText(args.title)
+        etLocation.setText(args.location)
+        etRating.setText(args.ratingText)
+
+        btnSave.setOnClickListener {
+            val newTitle = etTitle.text.toString().trim()
+            val newLocation = etLocation.text.toString().trim()
+            val newRating = etRating.text.toString().trim()
+
+            if (newTitle.isBlank() || newLocation.isBlank()) {
+                Toast.makeText(requireContext(), "Please fill Title + Location", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
+
+            val update = mapOf(
+                "title" to newTitle,
+                "location" to newLocation,
+                "ratingText" to (if (newRating.isBlank()) "⭐ 0.0 (0)" else newRating),
+                "updatedAt" to FieldValue.serverTimestamp()
+            )
+
+            db.collection("posts")
+                .document(args.postId)
+                .update(update)
+                .addOnSuccessListener {
+                    Toast.makeText(requireContext(), "Post updated", Toast.LENGTH_SHORT).show()
+                    findNavController().popBackStack()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(requireContext(), e.message ?: "Update failed", Toast.LENGTH_LONG).show()
+                }
+        }
     }
 }
