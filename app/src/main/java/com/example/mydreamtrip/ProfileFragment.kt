@@ -46,7 +46,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                         ratingText = dest.ratingText,
                         author = dest.author,
                         imageRes = dest.imageRes,
-                        imageUrl = dest.imageUrl
+                        localImageUri = dest.localImageUri ?: ""
                     )
                 findNavController().navigate(action)
             }
@@ -77,10 +77,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                         id = doc.id,
                         title = doc.getString("title") ?: "",
                         location = doc.getString("location") ?: "",
-                        ratingText = doc.getString("ratingText") ?: "",
-                        author = doc.getString("author") ?: "",
+                        ratingText = doc.getString("ratingText") ?: "⭐ 0.0 (0)",
+                        author = doc.getString("author") ?: "Guest",
                         imageRes = (doc.getLong("imageRes") ?: android.R.drawable.ic_menu_gallery.toLong()).toInt(),
-                        imageUrl = doc.getString("imageUrl")
+                        localImageUri = doc.getString("localImageUri")
                     )
                 }
 

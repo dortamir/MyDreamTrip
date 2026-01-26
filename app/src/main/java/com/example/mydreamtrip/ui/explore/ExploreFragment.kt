@@ -38,7 +38,7 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
                         ratingText = dest.ratingText,
                         author = dest.author,
                         imageRes = dest.imageRes,
-                        imageUrl = dest.imageUrl
+                        localImageUri = dest.localImageUri ?: ""
                     )
                 findNavController().navigate(action)
             }
@@ -84,8 +84,9 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
                         ratingText = doc.getString("ratingText") ?: "⭐ 0.0 (0)",
                         author = doc.getString("author") ?: "Guest",
                         imageRes = (doc.getLong("imageRes") ?: android.R.drawable.ic_menu_gallery.toLong()).toInt(),
-                        imageUrl = doc.getString("imageUrl")
+                        localImageUri = doc.getString("localImageUri")
                     )
+
                 }
 
                 applyFilter()

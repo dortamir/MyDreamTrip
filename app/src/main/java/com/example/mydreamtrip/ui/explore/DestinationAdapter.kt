@@ -1,5 +1,6 @@
 package com.example.mydreamtrip.ui.explore
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,7 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mydreamtrip.R
 import com.example.mydreamtrip.model.Destination
-import com.bumptech.glide.Glide
+import com.squareup.picasso.Picasso
 
 class DestinationAdapter(
     private var items: List<Destination>,
@@ -36,13 +37,15 @@ class DestinationAdapter(
         holder.location.text = item.location
         holder.rating.text = item.ratingText
         holder.author.text = item.author
-        holder.imgCover.setImageResource(item.imageRes)
 
-        if (!item.imageUrl.isNullOrBlank()) {
-            Glide.with(holder.itemView)
-                .load(item.imageUrl)
+        val uriStr = item.localImageUri
+        if (!uriStr.isNullOrBlank()) {
+            Picasso.get()
+                .load(Uri.parse(uriStr))
                 .placeholder(android.R.drawable.ic_menu_gallery)
                 .error(android.R.drawable.ic_menu_gallery)
+                .fit()
+                .centerCrop()
                 .into(holder.imgCover)
         } else {
             holder.imgCover.setImageResource(item.imageRes)

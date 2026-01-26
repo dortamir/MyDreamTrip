@@ -2,35 +2,39 @@ package com.example.mydreamtrip
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.PickVisualMediaRequest
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
-import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
+import com.squareup.picasso.Picasso
 
 class AddFragment : Fragment(R.layout.fragment_add) {
+
     private val db by lazy { FirebaseFirestore.getInstance() }
-    private val storage by lazy { FirebaseStorage.getInstance() }
     private var selectedImageUri: Uri? = null
-    private lateinit var imgSelected: ImageView
 
     private val pickImage =
-        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri != null) {
                 selectedImageUri = uri
-                Glide.with(this).load(uri).into(imgSelected)
+                try {
+                    requireContext().contentResolver.takePersistableUriPermission(
+                        uri,
+                        android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                } catch (_: Exception) {
+                }
+
+                view?.findViewById<ImageView>(R.id.imgSelected)?.let { img ->
+                    Picasso.get().load(uri).fit().centerCrop().into(img)
+                }
             }
         }
 
@@ -42,12 +46,21 @@ class AddFragment : Fragment(R.layout.fragment_add) {
         val etRating = view.findViewById<EditText>(R.id.etRating)
         val tvStatus = view.findViewById<TextView>(R.id.tvAddStatus)
         val btnCreate = view.findViewById<Button>(R.id.btnCreatePost)
-
-        imgSelected = view.findViewById(R.id.imgSelected)
         val btnSelectPhoto = view.findViewById<Button>(R.id.btnSelectPhoto)
+        val imgSelected = view.findViewById<ImageView>(R.id.imgSelected)
 
-        btnSelectPhoto.setOnClickListener {
-            pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        fun setLoading(isLoading: Boolean, message: String? = null) {
+            btnCreate.isEnabled = !isLoading
+            btnSelectPhoto.isEnabled = !isLoading
+            tvStatus.text = message ?: ""
+        }
+
+        fun clearForm() {
+            etTitle.setText("")
+            etLocation.setText("")
+            etRating.setText("")
+            selectedImageUri = null
+            imgSelected.setImageResource(android.R.drawable.ic_menu_gallery)
         }
 
         fun goToExplore() {
@@ -55,21 +68,25 @@ class AddFragment : Fragment(R.layout.fragment_add) {
                 requireActivity().supportFragmentManager.findFragmentById(R.id.mainNavHost) as NavHostFragment
             val navController = navHost.navController
 
-            val options = NavOptions.Builder()
-                .setLaunchSingleTop(true)
-                .setPopUpTo(R.id.main_graph, false)
-                .build()
-
-            navController.navigate(R.id.exploreFragment, null, options)
+            navController.navigate(
+                R.id.exploreFragment,
+                null,
+                NavOptions.Builder()
+                    .setLaunchSingleTop(true)
+                    .setPopUpTo(R.id.main_graph, false)
+                    .build()
+            )
 
             requireActivity()
                 .findViewById<BottomNavigationView>(R.id.bottomNav)
                 .selectedItemId = R.id.exploreFragment
         }
 
-        btnCreate.setOnClickListener {
-            tvStatus.text = ""
+        btnSelectPhoto.setOnClickListener {
+            pickImage.launch(arrayOf("image/*"))
+        }
 
+        btnCreate.setOnClickListener {
             val title = etTitle.text.toString().trim()
             val location = etLocation.text.toString().trim()
             val ratingText = etRating.text.toString().trim()
@@ -79,60 +96,37 @@ class AddFragment : Fragment(R.layout.fragment_add) {
                 return@setOnClickListener
             }
 
+            setLoading(true, "Creating post...")
+
             val email = FirebaseAuth.getInstance().currentUser?.email ?: "Guest"
             val author = email.substringBefore("@")
 
             val docRef = db.collection("posts").document()
 
-            val baseData = hashMapOf(
+            val data = hashMapOf(
                 "title" to title,
                 "location" to location,
-                "ratingText" to (if (ratingText.isBlank()) "⭐ 0.0 (0)" else ratingText),
+                "ratingText" to if (ratingText.isBlank()) "⭐ 0.0 (0)" else ratingText,
                 "author" to author,
-                "imageRes" to android.R.drawable.ic_menu_gallery,
+                "localImageUri" to (selectedImageUri?.toString() ?: ""),
                 "createdAt" to FieldValue.serverTimestamp()
             )
 
-            val imageUri = selectedImageUri
+            docRef.set(data)
+                .addOnSuccessListener {
+                    setLoading(false, "")
+                    Toast.makeText(requireContext(), "Post Created", Toast.LENGTH_SHORT).show()
+                    clearForm()
 
-            if (imageUri == null) {
-                docRef.set(baseData)
-                    .addOnSuccessListener {
-                        Toast.makeText(requireContext(), "Post Created", Toast.LENGTH_SHORT).show()
+                    try {
                         goToExplore()
+                    } catch (e: Exception) {
+                        Log.e("AddFragment", "Navigation failed", e)
+                        Toast.makeText(requireContext(), "Post created, but navigation failed", Toast.LENGTH_LONG).show()
                     }
-                    .addOnFailureListener { e ->
-                        tvStatus.text = e.message ?: "Failed to create post"
-                    }
-                return@setOnClickListener
-            }
-
-            tvStatus.text = "Uploading image..."
-
-            val fileRef = storage.reference.child("posts/${docRef.id}.jpg")
-            fileRef.putFile(imageUri)
-                .continueWithTask { task ->
-                    if (!task.isSuccessful) throw task.exception ?: Exception("Upload failed")
-                    fileRef.downloadUrl
-                }
-                .addOnSuccessListener { url ->
-                    val dataWithImage = HashMap(baseData)
-                    dataWithImage["imageUrl"] = url.toString()
-
-                    docRef.set(dataWithImage)
-                        .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Post Created", Toast.LENGTH_SHORT).show()
-                            // אופציונלי: לנקות אחרי יצירה
-                            selectedImageUri = null
-                            imgSelected.setImageResource(android.R.drawable.ic_menu_gallery)
-                            goToExplore()
-                        }
-                        .addOnFailureListener { e ->
-                            tvStatus.text = e.message ?: "Failed to create post"
-                        }
                 }
                 .addOnFailureListener { e ->
-                    tvStatus.text = e.message ?: "Image upload failed"
+                    setLoading(false, e.message ?: "Failed to create post")
                 }
         }
     }
