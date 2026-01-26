@@ -18,13 +18,38 @@
         android:layout_height="wrap_content"
         android:text="email"
         android:textSize="16sp"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/txtMyPostsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="My Posts"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="#2EC4C6"
+        android:layout_marginTop="24dp"/>
+
+    <TextView
+        android:id="@+id/tvEmptyMyPosts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="You haven't posted anything yet"
+        android:visibility="gone"
         android:layout_marginTop="12dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMyPosts"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_weight="1"/>
 
     <Button
         android:id="@+id/btnSignOut"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Sign Out"
-        android:layout_marginTop="20dp" />
+        android:layout_marginTop="16dp" />
 
 </LinearLayout>

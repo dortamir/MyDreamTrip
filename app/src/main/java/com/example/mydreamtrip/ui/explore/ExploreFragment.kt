@@ -27,18 +27,22 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
         val rv = view.findViewById<RecyclerView>(R.id.rvDestinations)
         rv.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        adapter = DestinationAdapter(emptyList()) { dest ->
-            val action = ExploreFragmentDirections
-                .actionExploreFragmentToPostDetailsFragment(
-                    dest.id,
-                    dest.title,
-                    dest.location,
-                    dest.ratingText,
-                    dest.author,
-                    dest.imageRes
-                )
-            findNavController().navigate(action)
-        }
+        adapter = DestinationAdapter(
+            items = emptyList(),
+            onClick = { dest ->
+                val action = ExploreFragmentDirections
+                    .actionExploreFragmentToPostDetailsFragment(
+                        postId = dest.id,
+                        title = dest.title,
+                        location = dest.location,
+                        ratingText = dest.ratingText,
+                        author = dest.author,
+                        imageRes = dest.imageRes
+                    )
+                findNavController().navigate(action)
+            }
+        )
+
         rv.adapter = adapter
 
         val txtCount = view.findViewById<TextView>(R.id.txtCount)
