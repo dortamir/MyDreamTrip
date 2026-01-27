@@ -4,92 +4,67 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mydreamtrip.R
-import com.example.mydreamtrip.model.Destination
+import com.example.mydreamtrip.data.repo.PostsRepository
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class ExploreFragment : Fragment(R.layout.fragment_explore) {
 
-    private lateinit var adapter: DestinationAdapter
-    private val db by lazy { FirebaseFirestore.getInstance() }
-
-    private var all: List<Destination> = emptyList()
+    private lateinit var repo: PostsRepository
+    private lateinit var pagingAdapter: DestinationPagingAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        repo = PostsRepository(requireContext())
+
         val rv = view.findViewById<RecyclerView>(R.id.rvDestinations)
         rv.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        adapter = DestinationAdapter(
-            items = emptyList(),
-            onClick = { dest ->
-                val action = ExploreFragmentDirections
-                    .actionExploreFragmentToPostDetailsFragment(
-                        postId = dest.id,
-                        title = dest.title,
-                        location = dest.location,
-                        ratingText = dest.ratingText,
-                        author = dest.author,
-                        imageRes = dest.imageRes,
-                        localImageUri = dest.localImageUri ?: ""
-                    )
-                findNavController().navigate(action)
-            }
-        )
-
-        rv.adapter = adapter
+        pagingAdapter = DestinationPagingAdapter { dest ->
+            val action = ExploreFragmentDirections
+                .actionExploreFragmentToPostDetailsFragment(
+                    postId = dest.id,
+                    title = dest.title,
+                    location = dest.location,
+                    ratingText = dest.ratingText,
+                    author = dest.author,
+                    imageRes = dest.imageRes,
+                    localImageUri = dest.localImageUri ?: ""
+                )
+            findNavController().navigate(action)
+        }
+        rv.adapter = pagingAdapter
 
         val txtCount = view.findViewById<TextView>(R.id.txtCount)
-        fun updateCount(n: Int) { txtCount.text = "$n posts" }
+        pagingAdapter.addLoadStateListener { state ->
+            val loading = state.refresh is LoadState.Loading
+            txtCount.text = if (loading) "Loading..." else "Loaded: ${pagingAdapter.itemCount}"
+        }
 
         val chipGroup = view.findViewById<ChipGroup>(R.id.chipGroup)
         val chipAll = view.findViewById<Chip>(R.id.chipAll)
         val chipFood = view.findViewById<Chip>(R.id.chipFood)
         val chipAdventure = view.findViewById<Chip>(R.id.chipAdventure)
 
-        fun applyFilter() {
-            val selectedId = chipGroup.checkedChipId
-            val filtered = when (selectedId) {
-                chipFood.id -> all.filter { it.title.contains("Food", true) || it.title.contains("Pasta", true) }
-                chipAdventure.id -> all.filter {
-                    it.title.contains("Adventure", true) || it.title.contains("Hiking", true) || it.title.contains("Jeep", true)
-                }
-                else -> all
+        chipAll.setOnClickListener { /* TODO later */ }
+        chipFood.setOnClickListener { /* TODO later */ }
+        chipAdventure.setOnClickListener { /* TODO later */ }
+
+        repo.startSyncExplorePosts()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repo.explorePaging().collectLatest { pagingData ->
+                pagingAdapter.submitData(pagingData)
             }
-            adapter.submitList(filtered)
-            updateCount(filtered.size)
         }
-
-        chipAll.setOnClickListener { applyFilter() }
-        chipFood.setOnClickListener { applyFilter() }
-        chipAdventure.setOnClickListener { applyFilter() }
-
-        db.collection("posts")
-            .orderBy("createdAt", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null || snapshot == null) return@addSnapshotListener
-
-                all = snapshot.documents.map { doc ->
-                    Destination(
-                        id = doc.id,
-                        title = doc.getString("title") ?: "",
-                        location = doc.getString("location") ?: "",
-                        ratingText = doc.getString("ratingText") ?: "⭐ 0.0 (0)",
-                        author = doc.getString("author") ?: "Guest",
-                        imageRes = (doc.getLong("imageRes") ?: android.R.drawable.ic_menu_gallery.toLong()).toInt(),
-                        localImageUri = doc.getString("localImageUri")
-                    )
-
-                }
-
-                applyFilter()
-            }
     }
 }
