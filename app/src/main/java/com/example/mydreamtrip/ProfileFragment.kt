@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
-
     private lateinit var adapter: DestinationAdapter
     private lateinit var repo: PostsRepository
 

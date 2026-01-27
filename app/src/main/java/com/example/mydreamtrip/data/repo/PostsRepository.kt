@@ -1,6 +1,10 @@
 package com.example.mydreamtrip.data.repo
 
 import android.content.Context
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import com.example.mydreamtrip.data.local.AppDatabase
 import com.example.mydreamtrip.data.local.PostEntity
 import com.example.mydreamtrip.data.local.PostsDao
@@ -9,15 +13,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class PostsRepository(context: Context) {
 
     private val dao: PostsDao = AppDatabase.getInstance(context).postsDao()
     private val db = FirebaseFirestore.getInstance()
-
     private val ioScope = CoroutineScope(Dispatchers.IO)
 
     fun observeExplore(): Flow<List<Destination>> {
@@ -26,6 +29,30 @@ class PostsRepository(context: Context) {
 
     fun observeMyPosts(author: String): Flow<List<Destination>> {
         return dao.observeByAuthor(author).map { list -> list.map { it.toDestination() } }
+    }
+
+    fun explorePaging(): Flow<PagingData<Destination>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { dao.pagingAll() }
+        ).flow.map { pagingData ->
+            pagingData.map { entity -> entity.toDestination() }
+        }
+    }
+
+    fun myPostsPaging(author: String): Flow<PagingData<Destination>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { dao.pagingByAuthor(author) }
+        ).flow.map { pagingData ->
+            pagingData.map { entity -> entity.toDestination() }
+        }
     }
 
     fun startSyncExplorePosts() {
