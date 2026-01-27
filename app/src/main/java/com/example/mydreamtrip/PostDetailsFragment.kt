@@ -1,13 +1,10 @@
 package com.example.mydreamtrip
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -18,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.squareup.picasso.Picasso
 
 class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
 
@@ -29,19 +27,31 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
 
         val args = PostDetailsFragmentArgs.fromBundle(requireArguments())
 
+        // ---- Main post UI ----
         view.findViewById<TextView>(R.id.txtDetailsTitle).text = args.title
         view.findViewById<TextView>(R.id.txtDetailsLocation).text = args.location
         view.findViewById<TextView>(R.id.txtDetailsRating).text = args.ratingText
         view.findViewById<TextView>(R.id.txtDetailsAuthor).text = args.author
-        view.findViewById<ImageView>(R.id.imgDetails).setImageResource(args.imageRes)
 
+        val imgDetails = view.findViewById<ImageView>(R.id.imgDetails)
+        if (!args.localImageUri.isNullOrBlank()) {
+            Picasso.get()
+                .load(Uri.parse(args.localImageUri))
+                .fit()
+                .centerCrop()
+                .placeholder(android.R.drawable.ic_menu_gallery)
+                .error(android.R.drawable.ic_menu_gallery)
+                .into(imgDetails)
+        } else {
+            imgDetails.setImageResource(args.imageRes)
+        }
+
+        // ---- Top buttons ----
         val btnDelete = view.findViewById<ImageButton>(R.id.btnDeletePost)
         val btnEdit = view.findViewById<ImageButton>(R.id.btnEditPost)
         val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
 
-        btnBack.setOnClickListener {
-            findNavController().popBackStack()
-        }
+        btnBack.setOnClickListener { findNavController().popBackStack() }
 
         val currentEmail = FirebaseAuth.getInstance().currentUser?.email
         val currentUsername = currentEmail?.substringBefore("@")
@@ -82,6 +92,41 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
             findNavController().navigate(action)
         }
 
+        // ---- Wikipedia section ----
+        val wikiBox = view.findViewById<LinearLayout>(R.id.wikiBox)
+        val wikiImg = view.findViewById<ImageView>(R.id.imgWiki)
+        val wikiTitle = view.findViewById<TextView>(R.id.txtWikiTitle)
+        val wikiExtract = view.findViewById<TextView>(R.id.txtWikiExtract)
+        val btnOpenWiki = view.findViewById<Button>(R.id.btnOpenWiki)
+
+        val hasWiki = args.wikiTitle.isNotBlank() || args.wikiExtract.isNotBlank() || args.wikiUrl.isNotBlank()
+
+        if (hasWiki) {
+            wikiBox.visibility = View.VISIBLE
+            wikiTitle.text = if (args.wikiTitle.isNotBlank()) args.wikiTitle else args.location
+            wikiExtract.text = args.wikiExtract
+
+            if (args.wikiImageUrl.isNotBlank()) {
+                wikiImg.visibility = View.VISIBLE
+                Picasso.get()
+                    .load(args.wikiImageUrl)
+                    .fit()
+                    .centerCrop()
+                    .into(wikiImg)
+            } else {
+                wikiImg.visibility = View.GONE
+            }
+
+            btnOpenWiki.isEnabled = args.wikiUrl.isNotBlank()
+            btnOpenWiki.setOnClickListener {
+                if (args.wikiUrl.isBlank()) return@setOnClickListener
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(args.wikiUrl)))
+            }
+        } else {
+            wikiBox.visibility = View.GONE
+        }
+
+        // ---- Comments ----
         val rv = view.findViewById<RecyclerView>(R.id.rvComments)
         rv.layoutManager = LinearLayoutManager(requireContext())
         commentAdapter = CommentAdapter(mutableListOf())
@@ -93,11 +138,10 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
                 if (error != null || snapshot == null) return@addSnapshotListener
 
                 val list = snapshot.documents.mapNotNull { doc ->
-                    val author = doc.getString("author") ?: return@mapNotNull null
-                    val text = doc.getString("text") ?: return@mapNotNull null
-                    Comment(author, text)
+                    val a = doc.getString("author") ?: return@mapNotNull null
+                    val t = doc.getString("text") ?: return@mapNotNull null
+                    Comment(a, t)
                 }
-
                 commentAdapter = CommentAdapter(list.toMutableList())
                 rv.adapter = commentAdapter
             }
@@ -118,9 +162,7 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
                     "text" to text,
                     "createdAt" to FieldValue.serverTimestamp()
                 )
-            ).addOnSuccessListener {
-                etComment.setText("")
-            }
+            ).addOnSuccessListener { etComment.setText("") }
         }
     }
 }

@@ -38,7 +38,11 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
                     ratingText = dest.ratingText,
                     author = dest.author,
                     imageRes = dest.imageRes,
-                    localImageUri = dest.localImageUri ?: ""
+                    localImageUri = dest.localImageUri ?: "",
+                    wikiTitle = dest.wikiTitle,
+                    wikiExtract = dest.wikiExtract,
+                    wikiUrl = dest.wikiUrl,
+                    wikiImageUrl = dest.wikiImageUrl
                 )
             findNavController().navigate(action)
         }

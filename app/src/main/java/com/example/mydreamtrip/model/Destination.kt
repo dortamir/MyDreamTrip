@@ -7,5 +7,11 @@ data class Destination(
     val ratingText: String,
     val author: String,
     val imageRes: Int,
-    val localImageUri: String? = null
+    val localImageUri: String? = null,
+
+    // Wikipedia fields
+    val wikiTitle: String = "",
+    val wikiExtract: String = "",
+    val wikiUrl: String = "",
+    val wikiImageUrl: String = ""
 )

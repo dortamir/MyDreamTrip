@@ -66,11 +66,33 @@
         <argument
             android:name="imageRes"
             app:argType="integer" />
+
         <argument
             android:name="localImageUri"
             app:argType="string"
             android:defaultValue=""
             app:nullable="true" />
+
+        <argument
+            android:name="wikiTitle"
+            app:argType="string"
+            android:defaultValue="" />
+
+        <argument
+            android:name="wikiExtract"
+            app:argType="string"
+            android:defaultValue="" />
+
+        <argument
+            android:name="wikiUrl"
+            app:argType="string"
+            android:defaultValue="" />
+
+        <argument
+            android:name="wikiImageUrl"
+            app:argType="string"
+            android:defaultValue="" />
+
 
     </fragment>
 
