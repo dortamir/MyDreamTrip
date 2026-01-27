@@ -72,6 +72,13 @@ class PostsRepository(context: Context) {
                         ratingText = doc.getString("ratingText") ?: "⭐ 0.0 (0)",
                         author = doc.getString("author") ?: "Guest",
                         localImageUri = doc.getString("localImageUri")?.takeIf { it.isNotBlank() },
+
+                        //  pull from Firestore and cache in Room
+                        wikiTitle = doc.getString("wikiTitle")?.takeIf { it.isNotBlank() },
+                        wikiExtract = doc.getString("wikiExtract")?.takeIf { it.isNotBlank() },
+                        wikiUrl = doc.getString("wikiUrl")?.takeIf { it.isNotBlank() },
+                        wikiImageUrl = doc.getString("wikiImageUrl")?.takeIf { it.isNotBlank() },
+
                         createdAt = createdAtMillis
                     )
                 }
@@ -90,7 +97,13 @@ class PostsRepository(context: Context) {
             ratingText = ratingText,
             author = author,
             imageRes = android.R.drawable.ic_menu_gallery,
-            localImageUri = localImageUri
+            localImageUri = localImageUri,
+
+            //  now available in UI
+            wikiTitle = wikiTitle ?: "",
+            wikiExtract = wikiExtract ?: "",
+            wikiUrl = wikiUrl ?: "",
+            wikiImageUrl = wikiImageUrl ?: ""
         )
     }
 }

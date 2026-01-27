@@ -14,5 +14,11 @@ data class PostEntity(
 
     val localImageUri: String?,
 
+    //  Wiki fields (nullable)
+    val wikiTitle: String? = null,
+    val wikiExtract: String? = null,
+    val wikiUrl: String? = null,
+    val wikiImageUrl: String? = null,
+
     val createdAt: Long
 )
