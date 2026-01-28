@@ -5,63 +5,120 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="16dp"
-    app:cardUseCompatPadding="true">
+    style="@style/MdtCard"
+    app:cardBackgroundColor="@color/mdt_surface">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imgCover"
             android:layout_width="match_parent"
             android:layout_height="120dp"
             android:scaleType="centerCrop"
             android:contentDescription="@null"
-            android:src="@android:drawable/ic_menu_gallery"/>
+            android:src="@android:drawable/ic_menu_gallery"
+            app:shapeAppearanceOverlay="@style/MdtImageTopRounded"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:padding="@dimen/space_12">
 
             <TextView
                 android:id="@+id/txtCardTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Title"
+                android:text="Santorini Sunset Views"
                 android:textStyle="bold"
                 android:textSize="16sp"
+                android:textColor="@color/mdt_text_primary"
                 android:maxLines="2"/>
 
-            <TextView
-                android:id="@+id/txtLocation"
+            <!-- Location row -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Location"
-                android:textSize="13sp"
-                android:layout_marginTop="4dp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="6dp">
 
-            <TextView
-                android:id="@+id/txtRating"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="⭐ 4.8 (234)"
-                android:textSize="13sp"
-                android:layout_marginTop="6dp"/>
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@android:drawable/ic_menu_mylocation"
+                    app:tint="@color/mdt_icon_muted"
+                    android:contentDescription="@null"/>
 
-            <TextView
-                android:id="@+id/txtAuthor"
+                <TextView
+                    android:id="@+id/txtLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Santorini, Greece"
+                    android:textSize="13sp"
+                    android:textColor="@color/mdt_text_secondary"
+                    android:layout_marginStart="6dp"/>
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="author"
-                android:textSize="12sp"
-                android:layout_marginTop="8dp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@android:drawable/btn_star_big_on"
+                    app:tint="@color/mdt_primary"
+                    android:contentDescription="@null"/>
+
+                <TextView
+                    android:id="@+id/txtRating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4.8 (234)"
+                    android:textSize="13sp"
+                    android:textColor="@color/mdt_text_primary"
+                    android:layout_marginStart="6dp"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/mdt_stroke"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imgAuthor"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@android:drawable/ic_menu_gallery"
+                    android:contentDescription="@null"
+                    app:shapeAppearanceOverlay="@style/MdtCircleImage" />
+
+                <TextView
+                    android:id="@+id/txtAuthor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Shani Attias"
+                    android:textSize="13sp"
+                    android:textColor="@color/mdt_text_primary"
+                    android:layout_marginStart="10dp"/>
+            </LinearLayout>
 
         </LinearLayout>
-
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

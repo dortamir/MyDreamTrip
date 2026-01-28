@@ -17,4 +17,17 @@
         <item name="strokeWidth">1dp</item>
     </style>
 
+    <style name="MdtImageTopRounded">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">@dimen/corner_16</item>
+        <item name="cornerSizeTopRight">@dimen/corner_16</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <style name="MdtCircleImage">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
 </resources>

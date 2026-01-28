@@ -54,15 +54,6 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
             txtCount.text = if (loading) "Loading..." else "Loaded: ${pagingAdapter.itemCount}"
         }
 
-        val chipGroup = view.findViewById<ChipGroup>(R.id.chipGroup)
-        val chipAll = view.findViewById<Chip>(R.id.chipAll)
-        val chipFood = view.findViewById<Chip>(R.id.chipFood)
-        val chipAdventure = view.findViewById<Chip>(R.id.chipAdventure)
-
-        chipAll.setOnClickListener { /* TODO later */ }
-        chipFood.setOnClickListener { /* TODO later */ }
-        chipAdventure.setOnClickListener { /* TODO later */ }
-
         repo.startSyncExplorePosts()
 
         viewLifecycleOwner.lifecycleScope.launch {
