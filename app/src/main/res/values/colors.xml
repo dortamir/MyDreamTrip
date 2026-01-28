@@ -3,6 +3,7 @@
     <color name="mdt_primary">#21B6C7</color>
     <color name="mdt_primary_dark">#179AAA</color>
     <color name="mdt_on_primary">#FFFFFF</color>
+    <color name="mdt_primary_10">#1A2CBBC3</color>
 
     <color name="mdt_bg">#EAF7FB</color>
     <color name="mdt_surface">#FFFFFF</color>

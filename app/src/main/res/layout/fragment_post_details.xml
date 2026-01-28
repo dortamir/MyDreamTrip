@@ -38,7 +38,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@android:color/transparent"
-                    android:src="@android:drawable/ic_media_previous"
+                    android:src="@drawable/ic_back"
                     app:tint="@color/mdt_text_primary"
                     android:contentDescription="Back"/>
             </com.google.android.material.card.MaterialCardView>
@@ -62,7 +62,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="@android:color/transparent"
-                        android:src="@android:drawable/ic_menu_edit"
+                        android:src="@drawable/ic_edit"
                         app:tint="@color/mdt_text_primary"
                         android:contentDescription="Edit"
                         android:visibility="gone"/>
@@ -79,7 +79,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="@android:color/transparent"
-                        android:src="@android:drawable/ic_menu_delete"
+                        android:src="@drawable/ic_delete"
                         app:tint="@color/mdt_text_primary"
                         android:contentDescription="Delete"
                         android:visibility="gone"/>
