@@ -1,171 +1,303 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/mdt_bg"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp">
+            android:layout_height="260dp">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/imgDetails"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:src="@android:drawable/ic_menu_gallery"
-                android:contentDescription="@null" />
+                android:contentDescription="@null"
+                app:shapeAppearanceOverlay="@style/MdtImageTopRounded"/>
 
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="top|start"
-                android:layout_margin="8dp"
-                android:background="@android:color/transparent"
-                android:padding="8dp"
-                android:src="@android:drawable/ic_media_previous"
-                android:contentDescription="Back" />
+            <com.google.android.material.card.MaterialCardView
+                style="@style/MdtCard"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_margin="16dp"
+                app:cardBackgroundColor="@color/mdt_surface"
+                android:layout_gravity="top|start">
+
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    android:src="@android:drawable/ic_media_previous"
+                    app:tint="@color/mdt_text_primary"
+                    android:contentDescription="Back"/>
+            </com.google.android.material.card.MaterialCardView>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|end"
-                android:layout_margin="8dp"
+                android:layout_margin="16dp"
                 android:orientation="horizontal">
 
-                <ImageButton
-                    android:id="@+id/btnEditPost"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@android:color/transparent"
-                    android:padding="8dp"
-                    android:src="@android:drawable/ic_menu_edit"
-                    android:contentDescription="Edit"
-                    android:visibility="gone" />
+                <com.google.android.material.card.MaterialCardView
+                    style="@style/MdtCard"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    app:cardBackgroundColor="@color/mdt_surface"
+                    android:layout_marginEnd="10dp">
 
-                <ImageButton
-                    android:id="@+id/btnDeletePost"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@android:color/transparent"
-                    android:padding="8dp"
-                    android:src="@android:drawable/ic_menu_delete"
-                    android:contentDescription="Delete"
-                    android:visibility="gone" />
+                    <ImageButton
+                        android:id="@+id/btnEditPost"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
+                        android:src="@android:drawable/ic_menu_edit"
+                        app:tint="@color/mdt_text_primary"
+                        android:contentDescription="Edit"
+                        android:visibility="gone"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    style="@style/MdtCard"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    app:cardBackgroundColor="@color/mdt_surface">
+
+                    <ImageButton
+                        android:id="@+id/btnDeletePost"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
+                        android:src="@android:drawable/ic_menu_delete"
+                        app:tint="@color/mdt_text_primary"
+                        android:contentDescription="Delete"
+                        android:visibility="gone"/>
+                </com.google.android.material.card.MaterialCardView>
+
             </LinearLayout>
-
         </FrameLayout>
 
-        <TextView
-            android:id="@+id/txtDetailsTitle"
+        <com.google.android.material.card.MaterialCardView
+            style="@style/MdtCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Title"
-            android:textStyle="bold"
-            android:textSize="22sp"
-            android:layout_marginTop="12dp"/>
+            android:layout_marginStart="@dimen/space_16"
+            android:layout_marginEnd="@dimen/space_16"
+            android:layout_marginTop="3dp"
+            app:cardBackgroundColor="@color/mdt_surface">
 
-        <TextView
-            android:id="@+id/txtDetailsLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Location"
-            android:textSize="16sp"
-            android:layout_marginTop="6dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/space_16">
 
-        <TextView
-            android:id="@+id/txtDetailsRating"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Rating"
-            android:textSize="16sp"
-            android:layout_marginTop="6dp"/>
+                <TextView
+                    android:id="@+id/txtDetailsTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Title"
+                    android:textColor="@color/mdt_text_primary"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/txtDetailsAuthor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Author"
-            android:textSize="14sp"
-            android:layout_marginTop="10dp"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-        <!-- WIKI BOX -->
-        <LinearLayout
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:contentDescription="@null"
+                        android:src="@android:drawable/ic_menu_mylocation"
+                        app:tint="@color/mdt_icon_muted" />
+
+                    <TextView
+                        android:id="@+id/txtDetailsLocation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Location"
+                        android:textColor="@color/mdt_text_secondary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:contentDescription="@null"
+                        android:src="@android:drawable/btn_star_big_on"
+                        app:tint="@color/mdt_primary" />
+
+                    <TextView
+                        android:id="@+id/txtDetailsRating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="4.8 (234)"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtDetailsAuthor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="by Author"
+                    android:textColor="@color/mdt_text_secondary"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/wikiBox"
+            style="@style/MdtCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="16dp"
-            android:padding="12dp"
-            android:background="@android:color/transparent"
+            android:layout_marginStart="@dimen/space_16"
+            android:layout_marginEnd="@dimen/space_16"
+            android:layout_marginTop="6dp"
+            app:cardBackgroundColor="@color/mdt_surface"
             android:visibility="gone">
 
-            <ImageView
-                android:id="@+id/imgWiki"
-                android:layout_width="match_parent"
-                android:layout_height="160dp"
-                android:scaleType="centerCrop"
-                android:contentDescription="@null"
-                android:visibility="gone"/>
-
-            <TextView
-                android:id="@+id/txtWikiTitle"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:layout_marginTop="10dp"
-                android:text="Wikipedia title"/>
+                android:orientation="vertical"
+                android:padding="@dimen/space_16">
 
-            <TextView
-                android:id="@+id/txtWikiExtract"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textSize="14sp"
-                android:text="Wikipedia extract"/>
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imgWiki"
+                    android:layout_width="match_parent"
+                    android:layout_height="160dp"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@null"
+                    android:visibility="gone"
+                    app:shapeAppearanceOverlay="@style/MdtImageTopRounded"/>
 
-            <Button
-                android:id="@+id/btnOpenWiki"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Open Wikipedia"
-                android:layout_marginTop="10dp" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/txtWikiTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:textColor="@color/mdt_text_primary"
+                    android:layout_marginTop="12dp"
+                    android:text="Wikipedia title"/>
+
+                <TextView
+                    android:id="@+id/txtWikiExtract"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textSize="14sp"
+                    android:textColor="@color/mdt_text_secondary"
+                    android:text="Wikipedia extract"/>
+
+                <Button
+                    android:id="@+id/btnOpenWiki"
+                    style="@style/MdtPrimaryButton"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="12dp"
+                    android:text="Open Wikipedia"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
+            android:id="@+id/txtCommentsTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Comments"
             android:textStyle="bold"
             android:textSize="18sp"
-            android:layout_marginTop="18dp"
-            android:layout_marginBottom="8dp"/>
+            android:textColor="@color/mdt_text_primary"
+            android:layout_marginStart="@dimen/space_16"
+            android:layout_marginEnd="@dimen/space_16"
+            android:layout_marginTop="@dimen/space_20"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvComments"
-            android:layout_width="match_parent"
-            android:layout_height="300dp" />
-
-        <EditText
-            android:id="@+id/etComment"
+        <com.google.android.material.card.MaterialCardView
+            style="@style/MdtCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Write a comment..."
-            android:layout_marginTop="12dp"/>
+            android:layout_marginStart="@dimen/space_16"
+            android:layout_marginEnd="@dimen/space_16"
+            android:layout_marginTop="@dimen/space_12"
+            app:cardBackgroundColor="@color/mdt_surface">
 
-        <Button
-            android:id="@+id/btnAddComment"
-            android:layout_width="wrap_content"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvComments"
+                android:layout_width="match_parent"
+                android:layout_height="280dp"
+                android:padding="8dp"
+                android:clipToPadding="false"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/MdtCard"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add"
-            android:layout_marginTop="10dp"/>
+            android:layout_marginStart="@dimen/space_16"
+            android:layout_marginEnd="@dimen/space_16"
+            android:layout_marginTop="@dimen/space_12"
+            android:layout_marginBottom="@dimen/space_24"
+            app:cardBackgroundColor="@color/mdt_surface">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/space_16">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusTopStart="@dimen/corner_16"
+                    app:boxCornerRadiusTopEnd="@dimen/corner_16"
+                    app:boxCornerRadiusBottomStart="@dimen/corner_16"
+                    app:boxCornerRadiusBottomEnd="@dimen/corner_16"
+                    app:boxStrokeColor="@color/mdt_stroke">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etComment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Write a comment..." />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Button
+                    android:id="@+id/btnAddComment"
+                    style="@style/MdtPrimaryButton"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="@dimen/space_12"
+                    android:text="Add Comment"/>
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

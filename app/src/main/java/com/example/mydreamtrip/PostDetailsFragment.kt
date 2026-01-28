@@ -93,7 +93,7 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
         }
 
         // ---- Wikipedia section ----
-        val wikiBox = view.findViewById<LinearLayout>(R.id.wikiBox)
+        val wikiBox = view.findViewById<View>(R.id.wikiBox)
         val wikiImg = view.findViewById<ImageView>(R.id.imgWiki)
         val wikiTitle = view.findViewById<TextView>(R.id.txtWikiTitle)
         val wikiExtract = view.findViewById<TextView>(R.id.txtWikiExtract)
