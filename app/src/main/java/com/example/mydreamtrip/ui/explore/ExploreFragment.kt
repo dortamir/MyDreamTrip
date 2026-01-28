@@ -11,10 +11,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mydreamtrip.R
 import com.example.mydreamtrip.data.repo.PostsRepository
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import com.example.mydreamtrip.ui.explore.GridSpacingItemDecoration
 
 class ExploreFragment : Fragment(R.layout.fragment_explore) {
 
@@ -28,6 +27,9 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
 
         val rv = view.findViewById<RecyclerView>(R.id.rvDestinations)
         rv.layoutManager = GridLayoutManager(requireContext(), 2)
+        val spacing = resources.getDimensionPixelSize(R.dimen.space_8)
+        rv.addItemDecoration(GridSpacingItemDecoration(2, spacing))
+        rv.setHasFixedSize(true)
 
         pagingAdapter = DestinationPagingAdapter { dest ->
             val action = ExploreFragmentDirections
@@ -51,7 +53,7 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
         val txtCount = view.findViewById<TextView>(R.id.txtCount)
         pagingAdapter.addLoadStateListener { state ->
             val loading = state.refresh is LoadState.Loading
-            txtCount.text = if (loading) "Loading..." else "Loaded: ${pagingAdapter.itemCount}"
+            txtCount.text = if (loading) "Loading..." else "${pagingAdapter.itemCount} posts"
         }
 
         repo.startSyncExplorePosts()
