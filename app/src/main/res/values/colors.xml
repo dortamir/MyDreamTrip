@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="mdt_primary">#21B6C7</color>
+    <color name="mdt_primary_dark">#179AAA</color>
+    <color name="mdt_on_primary">#FFFFFF</color>
+
+    <color name="mdt_bg">#EAF7FB</color>
+    <color name="mdt_surface">#FFFFFF</color>
+    <color name="mdt_surface_alt">#F6FBFD</color>
+
+    <color name="mdt_text_primary">#0F172A</color>
+    <color name="mdt_text_secondary">#64748B</color>
+
+    <color name="mdt_stroke">#D6EEF5</color>
+
+    <color name="mdt_icon_muted">#8AA6B1</color>
 </resources>

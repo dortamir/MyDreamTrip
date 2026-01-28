@@ -22,17 +22,9 @@ class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
             return
         }
 
-        view.findViewById<Button>(R.id.btnGoLogin).setOnClickListener {
+        view.findViewById<Button>(R.id.btnGetStarted).setOnClickListener {
             findNavController().navigate(
-                WelcomeFragmentDirections
-                    .actionWelcomeFragmentToLoginFragment()
-            )
-        }
-
-        view.findViewById<Button>(R.id.btnGoSignup).setOnClickListener {
-            findNavController().navigate(
-                WelcomeFragmentDirections
-                    .actionWelcomeFragmentToSignupFragment()
+                WelcomeFragmentDirections.actionWelcomeFragmentToLoginFragment()
             )
         }
     }
