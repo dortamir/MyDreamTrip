@@ -1,52 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:background="@color/mdt_bg"
+    android:padding="@dimen/space_24">
+
+    <!-- Logo -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/logoCard"
+        style="@style/MdtCard"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        app:cardBackgroundColor="@color/mdt_primary"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center"
+            android:src="@android:drawable/ic_menu_compass"
+            app:tint="@color/mdt_on_primary"
+            android:contentDescription="@null"/>
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
+        android:id="@+id/tvAppName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Login"
+        android:text="My Dream Trip"
+        android:textStyle="bold"
         android:textSize="22sp"
-        android:paddingBottom="16dp" />
+        android:textColor="@color/mdt_text_primary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logoCard"
+        android:layout_marginTop="@dimen/space_20"/>
 
-    <EditText
-        android:id="@+id/etEmail"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tvWelcome"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Email"
-        android:inputType="textEmailAddress" />
+        android:text="Welcome back, traveler"
+        android:textSize="14sp"
+        android:textColor="@color/mdt_text_secondary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvAppName"
+        android:layout_marginTop="@dimen/space_8"/>
 
-    <EditText
-        android:id="@+id/etPassword"
-        android:layout_width="match_parent"
+    <!-- Email -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilEmail"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Password"
-        android:inputType="textPassword"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="@dimen/space_24"
+        app:boxBackgroundMode="outline"
+        app:boxCornerRadiusTopStart="@dimen/corner_16"
+        app:boxCornerRadiusTopEnd="@dimen/corner_16"
+        app:boxCornerRadiusBottomStart="@dimen/corner_16"
+        app:boxCornerRadiusBottomEnd="@dimen/corner_16"
+        app:boxStrokeColor="@color/mdt_stroke"
+        app:hintTextColor="@color/mdt_text_secondary"
+        app:layout_constraintTop_toBottomOf="@id/tvWelcome"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email Address"
+            android:inputType="textEmailAddress"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Password -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilPassword"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_12"
+        app:boxBackgroundMode="outline"
+        app:boxCornerRadiusTopStart="@dimen/corner_16"
+        app:boxCornerRadiusTopEnd="@dimen/corner_16"
+        app:boxCornerRadiusBottomStart="@dimen/corner_16"
+        app:boxCornerRadiusBottomEnd="@dimen/corner_16"
+        app:boxStrokeColor="@color/mdt_stroke"
+        app:hintTextColor="@color/mdt_text_secondary"
+        app:passwordToggleEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/tilEmail"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            android:inputType="textPassword"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/tvForgot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Forgot password?"
+        android:textColor="@color/mdt_primary"
+        android:textSize="13sp"
+        app:layout_constraintTop_toBottomOf="@id/tilPassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="@dimen/space_8"/>
 
     <Button
         android:id="@+id/btnLogin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Login"
-        android:layout_marginTop="16dp" />
+        style="@style/MdtPrimaryButton"
+        android:layout_width="0dp"
+        android:text="Log In"
+        android:layout_marginTop="@dimen/space_16"
+        app:layout_constraintTop_toBottomOf="@id/tvForgot"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <TextView
         android:id="@+id/tvGoSignup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="No account? Sign up"
-        android:layout_marginTop="12dp" />
+        android:textColor="@color/mdt_text_secondary"
+        android:layout_marginTop="@dimen/space_16"
+        app:layout_constraintTop_toBottomOf="@id/btnLogin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <TextView
         android:id="@+id/tvError"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text=""
-        android:layout_marginTop="10dp" />
+        android:textColor="#B00020"
+        android:layout_marginTop="@dimen/space_12"
+        app:layout_constraintTop_toBottomOf="@id/tvGoSignup"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
