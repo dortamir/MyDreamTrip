@@ -61,32 +61,36 @@ class PostsRepository(context: Context) {
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) return@addSnapshotListener
 
-                val entities = snapshot.documents.map { doc ->
-                    val createdAtMillis =
-                        doc.getTimestamp("createdAt")?.toDate()?.time ?: 0L
-
-                    PostEntity(
-                        id = doc.id,
-                        title = doc.getString("title") ?: "",
-                        location = doc.getString("location") ?: "",
-                        ratingText = doc.getString("ratingText") ?: "⭐ 0.0 (0)",
-                        author = doc.getString("author") ?: "Guest",
-                        localImageUri = doc.getString("localImageUri")?.takeIf { it.isNotBlank() },
-
-                        //  pull from Firestore and cache in Room
-                        wikiTitle = doc.getString("wikiTitle")?.takeIf { it.isNotBlank() },
-                        wikiExtract = doc.getString("wikiExtract")?.takeIf { it.isNotBlank() },
-                        wikiUrl = doc.getString("wikiUrl")?.takeIf { it.isNotBlank() },
-                        wikiImageUrl = doc.getString("wikiImageUrl")?.takeIf { it.isNotBlank() },
-
-                        createdAt = createdAtMillis
-                    )
-                }
+                val entities = snapshot.documents.map { doc -> doc.toPostEntity() }
 
                 ioScope.launch {
-                    dao.upsertAll(entities)
+                    // Full replace keeps local cache exactly equal to Firestore,
+                    // so deleted posts disappear from Explore/Profile immediately.
+                    dao.clearAll()
+                    if (entities.isNotEmpty()) {
+                        dao.upsertAll(entities)
+                    }
                 }
             }
+    }
+
+    private fun com.google.firebase.firestore.DocumentSnapshot.toPostEntity(): PostEntity {
+        val createdAtMillis =
+            getTimestamp("createdAt")?.toDate()?.time ?: 0L
+
+        return PostEntity(
+            id = id,
+            title = getString("title") ?: "",
+            location = getString("location") ?: "",
+            ratingText = getString("ratingText") ?: "⭐ 0.0 (0)",
+            author = getString("author") ?: "Guest",
+            localImageUri = getString("localImageUri")?.takeIf { it.isNotBlank() },
+            wikiTitle = getString("wikiTitle")?.takeIf { it.isNotBlank() },
+            wikiExtract = getString("wikiExtract")?.takeIf { it.isNotBlank() },
+            wikiUrl = getString("wikiUrl")?.takeIf { it.isNotBlank() },
+            wikiImageUrl = getString("wikiImageUrl")?.takeIf { it.isNotBlank() },
+            createdAt = createdAtMillis
+        )
     }
 
     private fun PostEntity.toDestination(): Destination {

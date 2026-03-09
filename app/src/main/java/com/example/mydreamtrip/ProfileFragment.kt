@@ -42,19 +42,24 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             txtName.text = u?.displayName ?: ""
             if (u?.photoUrl != null) {
                 Picasso.get().load(u.photoUrl).fit().centerCrop().into(imgThumb)
+            } else {
+                imgThumb.setImageResource(R.drawable.ic_profile)
             }
         }
 
         refreshUser()
 
+        // Listen for profile updates
+        findNavController().currentBackStackEntry?.savedStateHandle
+            ?.getLiveData<Boolean>("profileUpdated")?.observe(viewLifecycleOwner) { updated ->
+                if (updated == true) {
+                    refreshUser()
+                    findNavController().currentBackStackEntry?.savedStateHandle?.remove<Boolean>("profileUpdated")
+                }
+            }
+
         btnEditProfile.setOnClickListener {
-            val user = FirebaseAuth.getInstance().currentUser
-            val action = ProfileFragmentDirections.actionProfileFragmentToEditProfileFragment(
-                currentName = user?.displayName ?: "",
-                currentEmail = user?.email ?: "",
-                currentPhotoUrl = user?.photoUrl?.toString()
-            )
-            findNavController().navigate(action)
+            findNavController().navigate(R.id.action_profileFragment_to_editProfileFragment)
         }
 
         rvMyPosts.layoutManager = GridLayoutManager(requireContext(), 2)

@@ -14,18 +14,20 @@ import com.squareup.picasso.Picasso
 import androidx.activity.result.contract.ActivityResultContracts
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
+import com.google.firebase.storage.FirebaseStorage
 
 class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
 
     private val db by lazy { FirebaseFirestore.getInstance() }
 
     private var selectedImageUri: Uri? = null
+    private var pickedNewImage: Boolean = false
 
     private val pickImage =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri != null) {
                 selectedImageUri = uri
+                pickedNewImage = true
                 try {
                     requireContext().contentResolver.takePersistableUriPermission(
                         uri,
@@ -105,30 +107,62 @@ class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
             btnSave.isEnabled = false
             btnSave.text = "Saving..."
 
-            val update = mapOf(
+            val currentImageUri = selectedImageUri?.toString()
+                ?.takeIf { it.isNotBlank() }
+                ?: args.localImageUri
+
+            val baseUpdate = mutableMapOf<String, Any>(
                 "title" to newTitle,
                 "location" to newLocation,
                 "ratingText" to (if (newRating.isBlank()) "⭐ 0.0 (0)" else newRating),
-                "localImageUri" to (selectedImageUri?.toString() ?: ""),
+                "localImageUri" to (currentImageUri ?: ""),
                 "updatedAt" to FieldValue.serverTimestamp()
             )
 
             val postRef = db.collection("posts").document(postId)
-            // use set with merge so we don't fail if doc was removed (creates it if needed)
-            postRef.set(update, SetOptions.merge())
-                .addOnSuccessListener {
-                    Toast.makeText(requireContext(), "Post updated successfully!", Toast.LENGTH_SHORT).show()
-                    findNavController().popBackStack()
-                }
-                .addOnFailureListener { e ->
-                    btnSave.isEnabled = true
-                    btnSave.text = "Save Changes"
-                    val msg = when {
-                        e.message?.contains("NOT_FOUND") == true -> "Post not found (maybe deleted)"
-                        else -> "Failed to update post: ${e.message ?: "Unknown error"}"
+
+            fun savePost(updateMap: Map<String, Any>) {
+                // update() preserves all other fields (including wiki info)
+                postRef.update(updateMap)
+                    .addOnSuccessListener {
+                        Toast.makeText(requireContext(), "Post updated successfully!", Toast.LENGTH_SHORT).show()
+                        findNavController().popBackStack()
                     }
-                    Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
-                }
+                    .addOnFailureListener { e ->
+                        btnSave.isEnabled = true
+                        btnSave.text = "Save Changes"
+                        val msg = when {
+                            e.message?.contains("NOT_FOUND") == true -> "Post not found (maybe deleted)"
+                            else -> "Failed to update post: ${e.message ?: "Unknown error"}"
+                        }
+                        Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+                    }
+            }
+
+            if (pickedNewImage && selectedImageUri != null) {
+                val imageRef = FirebaseStorage.getInstance().reference
+                    .child("post_images/$postId.jpg")
+
+                imageRef.putFile(selectedImageUri!!)
+                    .addOnSuccessListener {
+                        imageRef.downloadUrl
+                            .addOnSuccessListener { downloadUri ->
+                                baseUpdate["localImageUri"] = downloadUri.toString()
+                                savePost(baseUpdate)
+                            }
+                            .addOnFailureListener {
+                                // fallback to local uri if download URL retrieval fails
+                                savePost(baseUpdate)
+                            }
+                    }
+                    .addOnFailureListener {
+                        // if Storage upload is blocked by rules/network, still save the post
+                        // using local image URI so edit operation succeeds
+                        savePost(baseUpdate)
+                    }
+            } else {
+                savePost(baseUpdate)
+            }
         }
     }
 }
