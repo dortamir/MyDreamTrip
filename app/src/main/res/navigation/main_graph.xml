@@ -121,6 +121,12 @@
         <argument
             android:name="imageRes"
             app:argType="integer" />
+
+        <argument
+            android:name="localImageUri"
+            app:argType="string"
+            android:defaultValue=""
+            app:nullable="true" />
     </fragment>
 
 

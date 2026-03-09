@@ -62,6 +62,54 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
 
         val postRef = db.collection("posts").document(args.postId)
 
+        // vars for wiki section (used by both initial setup and listener)
+        val wikiBox = view.findViewById<View>(R.id.wikiBox)
+        val wikiTitle = view.findViewById<TextView>(R.id.txtWikiTitle)
+        val wikiExtract = view.findViewById<TextView>(R.id.txtWikiExtract)
+        val btnOpenWiki = view.findViewById<Button>(R.id.btnOpenWiki)
+
+        // listen for realtime updates so details stay fresh after editing
+        postRef.addSnapshotListener { snapshot, error ->
+            if (error != null || snapshot == null || !snapshot.exists()) return@addSnapshotListener
+
+            val updatedTitle = snapshot.getString("title") ?: args.title
+            val updatedLocation = snapshot.getString("location") ?: args.location
+            val updatedRating = snapshot.getString("ratingText") ?: args.ratingText
+            val updatedAuthor = snapshot.getString("author") ?: args.author
+            val updatedLocalUri = snapshot.getString("localImageUri") ?: ""
+            val updatedWikiTitle = snapshot.getString("wikiTitle") ?: ""
+            val updatedWikiExtract = snapshot.getString("wikiExtract") ?: ""
+            val updatedWikiUrl = snapshot.getString("wikiUrl") ?: ""
+
+            view.findViewById<TextView>(R.id.txtDetailsTitle).text = updatedTitle
+            view.findViewById<TextView>(R.id.txtDetailsLocation).text = updatedLocation
+            view.findViewById<TextView>(R.id.txtDetailsRating).text = updatedRating
+            view.findViewById<TextView>(R.id.txtDetailsAuthor).text = updatedAuthor
+
+            if (updatedLocalUri.isNotBlank()) {
+                Picasso.get().load(Uri.parse(updatedLocalUri)).fit().centerCrop()
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_gallery)
+                    .into(imgDetails)
+            } else {
+                imgDetails.setImageResource(args.imageRes)
+            }
+
+            // wiki field updates
+            if (updatedWikiTitle.isNotBlank() || updatedWikiExtract.isNotBlank() || updatedWikiUrl.isNotBlank()) {
+                wikiBox.visibility = View.VISIBLE
+                wikiTitle.text = if (updatedWikiTitle.isNotBlank()) updatedWikiTitle else updatedLocation
+                wikiExtract.text = updatedWikiExtract
+                btnOpenWiki.isEnabled = updatedWikiUrl.isNotBlank()
+                btnOpenWiki.setOnClickListener {
+                    if (updatedWikiUrl.isBlank()) return@setOnClickListener
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(updatedWikiUrl)))
+                }
+            } else {
+                wikiBox.visibility = View.GONE
+            }
+        }
+
         btnDelete.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("Delete post?")
@@ -87,16 +135,13 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
                     title = args.title,
                     location = args.location,
                     ratingText = args.ratingText,
-                    imageRes = args.imageRes
+                    imageRes = args.imageRes,
+                    localImageUri = args.localImageUri ?: ""
                 )
             findNavController().navigate(action)
         }
 
         // ---- Wikipedia section ----
-        val wikiBox = view.findViewById<View>(R.id.wikiBox)
-        val wikiTitle = view.findViewById<TextView>(R.id.txtWikiTitle)
-        val wikiExtract = view.findViewById<TextView>(R.id.txtWikiExtract)
-        val btnOpenWiki = view.findViewById<Button>(R.id.btnOpenWiki)
 
         val hasWiki = args.wikiTitle.isNotBlank() || args.wikiExtract.isNotBlank() || args.wikiUrl.isNotBlank()
 
