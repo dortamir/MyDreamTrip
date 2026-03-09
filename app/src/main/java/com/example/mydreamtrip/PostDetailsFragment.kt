@@ -93,8 +93,7 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
         }
 
         // ---- Wikipedia section ----
-        val wikiBox = view.findViewById<LinearLayout>(R.id.wikiBox)
-        val wikiImg = view.findViewById<ImageView>(R.id.imgWiki)
+        val wikiBox = view.findViewById<View>(R.id.wikiBox)
         val wikiTitle = view.findViewById<TextView>(R.id.txtWikiTitle)
         val wikiExtract = view.findViewById<TextView>(R.id.txtWikiExtract)
         val btnOpenWiki = view.findViewById<Button>(R.id.btnOpenWiki)
@@ -106,16 +105,6 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
             wikiTitle.text = if (args.wikiTitle.isNotBlank()) args.wikiTitle else args.location
             wikiExtract.text = args.wikiExtract
 
-            if (args.wikiImageUrl.isNotBlank()) {
-                wikiImg.visibility = View.VISIBLE
-                Picasso.get()
-                    .load(args.wikiImageUrl)
-                    .fit()
-                    .centerCrop()
-                    .into(wikiImg)
-            } else {
-                wikiImg.visibility = View.GONE
-            }
 
             btnOpenWiki.isEnabled = args.wikiUrl.isNotBlank()
             btnOpenWiki.setOnClickListener {

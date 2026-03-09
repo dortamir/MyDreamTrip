@@ -4,16 +4,16 @@
     <item
         android:id="@+id/exploreFragment"
         android:title="Explore"
-        android:icon="@android:drawable/ic_menu_compass" />
+        android:icon="@drawable/ic_explore"/>
 
     <item
         android:id="@+id/addFragment"
         android:title="Add"
-        android:icon="@android:drawable/ic_input_add" />
+        android:icon="@drawable/ic_add"/>
 
     <item
         android:id="@+id/profileFragment"
         android:title="Profile"
-        android:icon="@android:drawable/ic_menu_myplaces" />
+        android:icon="@drawable/ic_profile"/>
 
 </menu>

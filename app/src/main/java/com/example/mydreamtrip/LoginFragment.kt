@@ -33,8 +33,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             FirebaseAuth.getInstance()
                 .signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
-                    //val action = LoginFragmentDirections.actionLoginFragmentToMainActivity()
-                    //findNavController().navigate(action)
 
                     val intent = Intent(requireContext(), MainActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
