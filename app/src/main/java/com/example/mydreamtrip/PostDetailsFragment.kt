@@ -50,6 +50,7 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
         val btnDelete = view.findViewById<ImageButton>(R.id.btnDeletePost)
         val btnEdit = view.findViewById<ImageButton>(R.id.btnEditPost)
         val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
+        val buttonsContainer = view.findViewById<LinearLayout>(R.id.buttonsContainer)
 
         btnBack.setOnClickListener { findNavController().popBackStack() }
 
@@ -57,8 +58,7 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
         val currentUsername = currentEmail?.substringBefore("@")
         val isOwner = !currentUsername.isNullOrBlank() && currentUsername.equals(args.author, ignoreCase = true)
 
-        btnDelete.visibility = if (isOwner) View.VISIBLE else View.GONE
-        btnEdit.visibility = if (isOwner) View.VISIBLE else View.GONE
+        buttonsContainer?.visibility = if (isOwner) View.VISIBLE else View.GONE
 
         val postRef = db.collection("posts").document(args.postId)
 
@@ -166,6 +166,8 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
         commentAdapter = CommentAdapter(mutableListOf())
         rv.adapter = commentAdapter
 
+        val tvNoComments = view.findViewById<TextView>(R.id.tvNoComments)
+
         postRef.collection("comments")
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
@@ -178,6 +180,8 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
                 }
                 commentAdapter = CommentAdapter(list.toMutableList())
                 rv.adapter = commentAdapter
+
+                tvNoComments.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
             }
 
         val etComment = view.findViewById<EditText>(R.id.etComment)
