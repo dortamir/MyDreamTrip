@@ -85,6 +85,7 @@ class PostsRepository(context: Context) {
             ratingText = getString("ratingText") ?: "⭐ 0.0 (0)",
             author = getString("author") ?: "Guest",
             localImageUri = getString("localImageUri")?.takeIf { it.isNotBlank() },
+            authorPhotoUrl = getString("authorPhotoUrl")?.takeIf { it.isNotBlank() },
             wikiTitle = getString("wikiTitle")?.takeIf { it.isNotBlank() },
             wikiExtract = getString("wikiExtract")?.takeIf { it.isNotBlank() },
             wikiUrl = getString("wikiUrl")?.takeIf { it.isNotBlank() },
@@ -102,6 +103,7 @@ class PostsRepository(context: Context) {
             author = author,
             imageRes = android.R.drawable.ic_menu_gallery,
             localImageUri = localImageUri,
+            authorPhotoUrl = authorPhotoUrl,
 
             //  now available in UI
             wikiTitle = wikiTitle ?: "",

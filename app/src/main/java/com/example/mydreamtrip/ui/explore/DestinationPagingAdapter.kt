@@ -23,6 +23,7 @@ class DestinationPagingAdapter(
         val location: TextView = itemView.findViewById(R.id.txtLocation)
         val rating: TextView = itemView.findViewById(R.id.txtRating)
         val author: TextView = itemView.findViewById(R.id.txtAuthor)
+        val imgAuthor: ImageView = itemView.findViewById(R.id.imgAuthor)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -50,6 +51,19 @@ class DestinationPagingAdapter(
                 .into(holder.imgCover)
         } else {
             holder.imgCover.setImageResource(item.imageRes)
+        }
+
+        val authorPhoto = item.authorPhotoUrl
+        if (!authorPhoto.isNullOrBlank()) {
+            Picasso.get()
+                .load(authorPhoto)
+                .placeholder(R.drawable.ic_profile)
+                .error(R.drawable.ic_profile)
+                .fit()
+                .centerCrop()
+                .into(holder.imgAuthor)
+        } else {
+            holder.imgAuthor.setImageResource(R.drawable.ic_profile)
         }
 
         holder.itemView.setOnClickListener { onClick(item) }

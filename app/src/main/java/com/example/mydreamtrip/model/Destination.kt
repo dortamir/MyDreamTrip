@@ -8,6 +8,7 @@ data class Destination(
     val author: String,
     val imageRes: Int,
     val localImageUri: String? = null,
+    val authorPhotoUrl: String? = null,
 
     // Wikipedia fields
     val wikiTitle: String = "",

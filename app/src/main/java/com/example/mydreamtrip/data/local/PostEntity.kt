@@ -13,6 +13,7 @@ data class PostEntity(
     val author: String,
 
     val localImageUri: String?,
+    val authorPhotoUrl: String? = null,
 
     //  Wiki fields (nullable)
     val wikiTitle: String? = null,
