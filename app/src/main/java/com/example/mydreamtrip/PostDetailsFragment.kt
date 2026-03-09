@@ -27,8 +27,9 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
 
         val args = PostDetailsFragmentArgs.fromBundle(requireArguments())
 
-        // ---- Main post UI ----
         view.findViewById<TextView>(R.id.txtDetailsTitle).text = args.title
+        val txtDetailsAbout = view.findViewById<TextView>(R.id.txtDetailsAbout)
+        txtDetailsAbout.visibility = View.GONE
         view.findViewById<TextView>(R.id.txtDetailsLocation).text = args.location
         view.findViewById<TextView>(R.id.txtDetailsRating).text = args.ratingText
         view.findViewById<TextView>(R.id.txtDetailsAuthor).text = args.author
@@ -46,7 +47,6 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
             imgDetails.setImageResource(args.imageRes)
         }
 
-        // ---- Top buttons ----
         val btnDelete = view.findViewById<ImageButton>(R.id.btnDeletePost)
         val btnEdit = view.findViewById<ImageButton>(R.id.btnEditPost)
         val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
@@ -62,17 +62,16 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
 
         val postRef = db.collection("posts").document(args.postId)
 
-        // vars for wiki section (used by both initial setup and listener)
         val wikiBox = view.findViewById<View>(R.id.wikiBox)
         val wikiTitle = view.findViewById<TextView>(R.id.txtWikiTitle)
         val wikiExtract = view.findViewById<TextView>(R.id.txtWikiExtract)
         val btnOpenWiki = view.findViewById<Button>(R.id.btnOpenWiki)
 
-        // listen for realtime updates so details stay fresh after editing
         postRef.addSnapshotListener { snapshot, error ->
             if (error != null || snapshot == null || !snapshot.exists()) return@addSnapshotListener
 
             val updatedTitle = snapshot.getString("title") ?: args.title
+            val updatedAboutTrip = snapshot.getString("aboutTrip") ?: ""
             val updatedLocation = snapshot.getString("location") ?: args.location
             val updatedRating = snapshot.getString("ratingText") ?: args.ratingText
             val updatedAuthor = snapshot.getString("author") ?: args.author
@@ -82,6 +81,12 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
             val updatedWikiUrl = snapshot.getString("wikiUrl") ?: ""
 
             view.findViewById<TextView>(R.id.txtDetailsTitle).text = updatedTitle
+            if (updatedAboutTrip.isNotBlank()) {
+                txtDetailsAbout.visibility = View.VISIBLE
+                txtDetailsAbout.text = updatedAboutTrip
+            } else {
+                txtDetailsAbout.visibility = View.GONE
+            }
             view.findViewById<TextView>(R.id.txtDetailsLocation).text = updatedLocation
             view.findViewById<TextView>(R.id.txtDetailsRating).text = updatedRating
             view.findViewById<TextView>(R.id.txtDetailsAuthor).text = updatedAuthor
@@ -95,7 +100,6 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
                 imgDetails.setImageResource(args.imageRes)
             }
 
-            // wiki field updates
             if (updatedWikiTitle.isNotBlank() || updatedWikiExtract.isNotBlank() || updatedWikiUrl.isNotBlank()) {
                 wikiBox.visibility = View.VISIBLE
                 wikiTitle.text = if (updatedWikiTitle.isNotBlank()) updatedWikiTitle else updatedLocation
@@ -141,8 +145,6 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
             findNavController().navigate(action)
         }
 
-        // ---- Wikipedia section ----
-
         val hasWiki = args.wikiTitle.isNotBlank() || args.wikiExtract.isNotBlank() || args.wikiUrl.isNotBlank()
 
         if (hasWiki) {
@@ -160,7 +162,6 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
             wikiBox.visibility = View.GONE
         }
 
-        // ---- Comments ----
         val rv = view.findViewById<RecyclerView>(R.id.rvComments)
         rv.layoutManager = LinearLayoutManager(requireContext())
         commentAdapter = CommentAdapter(mutableListOf(), currentUsername)

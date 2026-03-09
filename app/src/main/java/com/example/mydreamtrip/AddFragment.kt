@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.mydreamtrip.data.remote.wiki.WikiRepository
 import com.example.mydreamtrip.ui.add.AddViewModel
@@ -25,9 +26,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
     private val db by lazy { FirebaseFirestore.getInstance() }
     private val wikiRepo by lazy { WikiRepository() }
     private val vm: AddViewModel by viewModels()
-
     private var selectedImageUri: Uri? = null
-
     private var wikiTitle: String = ""
     private var wikiExtract: String = ""
     private var wikiUrl: String = ""
@@ -54,8 +53,10 @@ class AddFragment : Fragment(R.layout.fragment_add) {
         super.onViewCreated(view, savedInstanceState)
 
         val etTitle = view.findViewById<EditText>(R.id.etTitle)
+        val etAboutTrip = view.findViewById<EditText>(R.id.etAboutTrip)
         val etLocation = view.findViewById<EditText>(R.id.etLocation)
         val etRating = view.findViewById<EditText>(R.id.etRating)
+        val btnBack = view.findViewById<ImageButton>(R.id.btnBackAdd)
         val tvStatus = view.findViewById<TextView>(R.id.tvAddStatus)
         val btnCreate = view.findViewById<Button>(R.id.btnCreatePost)
         val btnSelectPhoto = view.findViewById<Button>(R.id.btnSelectPhoto)
@@ -63,22 +64,25 @@ class AddFragment : Fragment(R.layout.fragment_add) {
 
         val btnFetch = view.findViewById<Button>(R.id.btnFetchDestinationInfo)
         val progress = view.findViewById<ProgressBar>(R.id.progressDestination)
-        val imgPreview = view.findViewById<ImageView>(R.id.imgDestinationPreview)
         val txtWikiTitle = view.findViewById<TextView>(R.id.txtDestinationTitle)
         val txtWikiExtract = view.findViewById<TextView>(R.id.txtDestinationExtract)
         val txtWikiUrl = view.findViewById<TextView>(R.id.txtDestinationUrl)
+
+        btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
 
         fun setFormEnabled(enabled: Boolean) {
             btnCreate.isEnabled = enabled
             btnSelectPhoto.isEnabled = enabled
             btnFetch.isEnabled = enabled
             etTitle.isEnabled = enabled
+            etAboutTrip.isEnabled = enabled
             etLocation.isEnabled = enabled
             etRating.isEnabled = enabled
         }
 
         fun clearWikiPreview() {
-            imgPreview.visibility = View.GONE
             txtWikiTitle.visibility = View.GONE
             txtWikiExtract.visibility = View.GONE
             txtWikiUrl.visibility = View.GONE
@@ -89,6 +93,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
 
         fun clearForm() {
             etTitle.setText("")
+            etAboutTrip.setText("")
             etLocation.setText("")
             etRating.setText("")
             selectedImageUri = null
@@ -163,13 +168,6 @@ class AddFragment : Fragment(R.layout.fragment_add) {
                         txtWikiTitle.text = wikiTitle
                         txtWikiExtract.text = wikiExtract
                         txtWikiUrl.text = wikiUrl
-
-                        if (wikiImageUrl.isNotBlank()) {
-                            imgPreview.visibility = View.VISIBLE
-                            Picasso.get().load(wikiImageUrl).fit().centerCrop().into(imgPreview)
-                        } else {
-                            imgPreview.visibility = View.GONE
-                        }
                     }
                     is DestinationInfoState.Error -> {
                         progress.visibility = View.GONE
@@ -182,11 +180,12 @@ class AddFragment : Fragment(R.layout.fragment_add) {
 
         btnCreate.setOnClickListener {
             val title = etTitle.text.toString().trim()
+            val aboutTrip = etAboutTrip.text.toString().trim()
             val location = etLocation.text.toString().trim()
             val ratingText = etRating.text.toString().trim()
 
             if (title.isBlank() || location.isBlank()) {
-                tvStatus.text = "Please fill Title + Location"
+                tvStatus.text = "Please fill in all fields"
                 return@setOnClickListener
             }
 
@@ -202,7 +201,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
                 if (wikiTitle.isBlank() && wikiExtract.isBlank() && wikiUrl.isBlank() && wikiImageUrl.isBlank()) {
                     tvStatus.text = "Fetching Wikipedia..."
                     try {
-                        val info = wikiRepo.fetchDestinationInfo(location)  // ✅ זה השם הנכון!
+                        val info = wikiRepo.fetchDestinationInfo(location)
                         wikiTitle = info.wikiTitle
                         wikiExtract = info.wikiExtract
                         wikiUrl = info.wikiUrl ?: ""
@@ -215,6 +214,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
 
                 val data = hashMapOf(
                     "title" to title,
+                    "aboutTrip" to aboutTrip,
                     "location" to location,
                     "ratingText" to if (ratingText.isBlank()) "⭐ 0.0 (0)" else ratingText,
                     "author" to author,

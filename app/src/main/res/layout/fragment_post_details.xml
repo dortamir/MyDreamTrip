@@ -84,7 +84,7 @@
                         android:src="@drawable/ic_delete"
                         app:tint="@color/mdt_text_primary"
                         android:contentDescription="Delete"
-                        android:visibility="gone"/>
+                        android:visibility="visible"/>
                 </com.google.android.material.card.MaterialCardView>
 
             </LinearLayout>
@@ -113,6 +113,16 @@
                     android:textColor="@color/mdt_text_primary"
                     android:textSize="22sp"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtDetailsAbout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/mdt_text_secondary"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    android:text="About My Trip" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
