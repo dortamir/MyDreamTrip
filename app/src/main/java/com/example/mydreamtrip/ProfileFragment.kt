@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import com.google.android.material.imageview.ShapeableImageView
+import com.squareup.picasso.Picasso
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -26,13 +28,34 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         repo = PostsRepository(requireContext())
 
         val txtEmail = view.findViewById<TextView>(R.id.txtEmail)
+        val txtName = view.findViewById<TextView>(R.id.txtName)
+        val imgThumb = view.findViewById<ShapeableImageView>(R.id.imgProfileThumb)
+        val btnEditProfile = view.findViewById<Button>(R.id.btnEditProfile)
         val btnSignOut = view.findViewById<Button>(R.id.btnSignOut)
 
         val rvMyPosts = view.findViewById<RecyclerView>(R.id.rvMyPosts)
         val tvEmpty = view.findViewById<TextView>(R.id.tvEmptyMyPosts)
 
-        val user = FirebaseAuth.getInstance().currentUser
-        txtEmail.text = user?.email ?: "Guest"
+        fun refreshUser() {
+            val u = FirebaseAuth.getInstance().currentUser
+            txtEmail.text = u?.email ?: "Guest"
+            txtName.text = u?.displayName ?: ""
+            if (u?.photoUrl != null) {
+                Picasso.get().load(u.photoUrl).fit().centerCrop().into(imgThumb)
+            }
+        }
+
+        refreshUser()
+
+        btnEditProfile.setOnClickListener {
+            val user = FirebaseAuth.getInstance().currentUser
+            val action = ProfileFragmentDirections.actionProfileFragmentToEditProfileFragment(
+                currentName = user?.displayName ?: "",
+                currentEmail = user?.email ?: "",
+                currentPhotoUrl = user?.photoUrl?.toString()
+            )
+            findNavController().navigate(action)
+        }
 
         rvMyPosts.layoutManager = GridLayoutManager(requireContext(), 2)
 
@@ -58,6 +81,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         )
         rvMyPosts.adapter = adapter
 
+        val user = FirebaseAuth.getInstance().currentUser
         val email = user?.email
         if (email.isNullOrBlank()) {
             tvEmpty.visibility = View.VISIBLE
