@@ -47,6 +47,18 @@
 
             </LinearLayout>
 
+            <ImageButton
+                android:id="@+id/btnDeleteComment"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:layout_gravity="center_vertical"
+                android:scaleType="fitCenter"
+                android:background="?attr/selectableItemBackground"
+                android:src="@drawable/ic_delete"
+                android:contentDescription="Delete comment"
+                android:tint="@color/mdt_text_secondary"/>
+
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>

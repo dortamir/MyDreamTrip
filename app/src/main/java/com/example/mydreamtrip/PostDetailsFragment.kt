@@ -163,7 +163,7 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
         // ---- Comments ----
         val rv = view.findViewById<RecyclerView>(R.id.rvComments)
         rv.layoutManager = LinearLayoutManager(requireContext())
-        commentAdapter = CommentAdapter(mutableListOf())
+        commentAdapter = CommentAdapter(mutableListOf(), currentUsername)
         rv.adapter = commentAdapter
 
         val tvNoComments = view.findViewById<TextView>(R.id.tvNoComments)
@@ -176,9 +176,30 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
                 val list = snapshot.documents.mapNotNull { doc ->
                     val a = doc.getString("author") ?: return@mapNotNull null
                     val t = doc.getString("text") ?: return@mapNotNull null
-                    Comment(a, t)
+                    Comment(doc.id, a, t)
                 }
-                commentAdapter = CommentAdapter(list.toMutableList())
+                val onDeleteComment: (Comment) -> Unit = { comment ->
+                    if (currentUsername.isNullOrBlank() || !comment.author.equals(currentUsername, ignoreCase = true)) {
+                        Toast.makeText(requireContext(), "You can delete only your comments", Toast.LENGTH_SHORT).show()
+                    } else {
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("Delete comment?")
+                            .setMessage("Are you sure you want to delete this comment?")
+                            .setPositiveButton("Delete") { _, _ ->
+                                postRef.collection("comments").document(comment.id).delete()
+                                    .addOnSuccessListener {
+                                        Toast.makeText(requireContext(), "Comment deleted", Toast.LENGTH_SHORT).show()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Toast.makeText(requireContext(), e.message ?: "Delete failed", Toast.LENGTH_LONG).show()
+                                    }
+                            }
+                            .setNegativeButton("Cancel", null)
+                            .show()
+                    }
+                }
+                
+                commentAdapter = CommentAdapter(list.toMutableList(), currentUsername, onDeleteComment)
                 rv.adapter = commentAdapter
 
                 tvNoComments.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
@@ -204,3 +225,5 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
         }
     }
 }
+
+
