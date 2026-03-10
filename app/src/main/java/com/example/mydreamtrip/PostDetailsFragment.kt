@@ -22,6 +22,16 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
     private lateinit var commentAdapter: CommentAdapter
     private val db by lazy { FirebaseFirestore.getInstance() }
 
+    private fun normalizeRating(raw: String): String {
+        val stars = raw.count { it == '⭐' }
+        if (stars in 1..5) return "⭐".repeat(stars)
+
+        val numeric = raw.toIntOrNull()
+        if (numeric != null && numeric in 1..5) return "⭐".repeat(numeric)
+
+        return raw
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -31,7 +41,7 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
         val txtDetailsAbout = view.findViewById<TextView>(R.id.txtDetailsAbout)
         txtDetailsAbout.visibility = View.GONE
         view.findViewById<TextView>(R.id.txtDetailsLocation).text = args.location
-        view.findViewById<TextView>(R.id.txtDetailsRating).text = args.ratingText
+        view.findViewById<TextView>(R.id.txtDetailsRating).text = normalizeRating(args.ratingText)
         view.findViewById<TextView>(R.id.txtDetailsAuthor).text = args.author
 
         val imgDetails = view.findViewById<ImageView>(R.id.imgDetails)
@@ -88,7 +98,7 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
                 txtDetailsAbout.visibility = View.GONE
             }
             view.findViewById<TextView>(R.id.txtDetailsLocation).text = updatedLocation
-            view.findViewById<TextView>(R.id.txtDetailsRating).text = updatedRating
+            view.findViewById<TextView>(R.id.txtDetailsRating).text = normalizeRating(updatedRating)
             view.findViewById<TextView>(R.id.txtDetailsAuthor).text = updatedAuthor
 
             if (updatedLocalUri.isNotBlank()) {

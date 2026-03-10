@@ -10,18 +10,24 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
 import android.net.Uri
 import android.widget.ImageView
+import android.widget.TextView
 import com.squareup.picasso.Picasso
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
+import com.example.mydreamtrip.data.remote.wiki.WikiRepository
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.launch
 
 class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
 
     private val db by lazy { FirebaseFirestore.getInstance() }
+    private val wikiRepo by lazy { WikiRepository() }
 
     private var selectedImageUri: Uri? = null
     private var pickedNewImage: Boolean = false
+    private var selectedRating: Int = 0
 
     private val pickImage =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -55,9 +61,37 @@ class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
 
         val btnBack = view.findViewById<ImageButton>(R.id.btnBackEdit)
         val etTitle = view.findViewById<TextInputEditText>(R.id.etEditTitle)
+        val etAboutTrip = view.findViewById<TextInputEditText>(R.id.etEditAboutTrip)
         val etLocation = view.findViewById<TextInputEditText>(R.id.etEditLocation)
-        val etRating = view.findViewById<TextInputEditText>(R.id.etEditRating)
         val btnSave = view.findViewById<Button>(R.id.btnSaveEdit)
+        val postRef = db.collection("posts").document(postId)
+
+        val ratingStars = listOf(
+            view.findViewById<TextView>(R.id.starEditRating1),
+            view.findViewById<TextView>(R.id.starEditRating2),
+            view.findViewById<TextView>(R.id.starEditRating3),
+            view.findViewById<TextView>(R.id.starEditRating4),
+            view.findViewById<TextView>(R.id.starEditRating5)
+        )
+
+        fun renderRatingStars(value: Int) {
+            ratingStars.forEachIndexed { idx, star ->
+                if (idx < value) {
+                    star.text = "⭐"
+                    star.setTextColor(android.graphics.Color.parseColor("#FFC107"))
+                } else {
+                    star.text = "☆"
+                    star.setTextColor(android.graphics.Color.parseColor("#999999"))
+                }
+            }
+        }
+
+        ratingStars.forEachIndexed { idx, star ->
+            star.setOnClickListener {
+                selectedRating = idx + 1
+                renderRatingStars(selectedRating)
+            }
+        }
 
         // Set up back button
         btnBack.setOnClickListener {
@@ -67,7 +101,24 @@ class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
         // Prefill fields
         etTitle.setText(args.title)
         etLocation.setText(args.location)
-        etRating.setText(args.ratingText)
+        val initialStarsCount = args.ratingText.count { it == '⭐' }
+        selectedRating = if (initialStarsCount in 1..5) {
+            initialStarsCount
+        } else {
+            Regex("(\\d+(?:\\.\\d+)?)")
+                .find(args.ratingText)
+                ?.value
+                ?.toDoubleOrNull()
+                ?.toInt()
+                ?.coerceIn(1, 5)
+                ?: 0
+        }
+        renderRatingStars(selectedRating)
+        postRef.get().addOnSuccessListener { snapshot ->
+            if (snapshot != null && snapshot.exists()) {
+                etAboutTrip.setText(snapshot.getString("aboutTrip") ?: "")
+            }
+        }
 
         // prefill image if available
         val imgView = view.findViewById<ImageView>(R.id.imgEditSelected)
@@ -83,8 +134,8 @@ class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
 
         btnSave.setOnClickListener {
             val newTitle = etTitle.text.toString().trim()
+            val newAboutTrip = etAboutTrip.text.toString().trim()
             val newLocation = etLocation.text.toString().trim()
-            val newRating = etRating.text.toString().trim()
 
             // Enhanced validation
             if (newTitle.isBlank()) {
@@ -98,6 +149,8 @@ class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
                 etLocation.requestFocus()
                 return@setOnClickListener
             }
+
+            val newRatingStars = "⭐".repeat(selectedRating.coerceIn(0, 5))
 
             // Clear any previous errors
             etTitle.error = null
@@ -113,13 +166,12 @@ class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
 
             val baseUpdate = mutableMapOf<String, Any>(
                 "title" to newTitle,
+                "aboutTrip" to newAboutTrip,
                 "location" to newLocation,
-                "ratingText" to (if (newRating.isBlank()) "⭐ 0.0 (0)" else newRating),
+                "ratingText" to newRatingStars,
                 "localImageUri" to (currentImageUri ?: ""),
                 "updatedAt" to FieldValue.serverTimestamp()
             )
-
-            val postRef = db.collection("posts").document(postId)
 
             fun savePost(updateMap: Map<String, Any>) {
                 // update() preserves all other fields (including wiki info)
@@ -139,29 +191,48 @@ class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
                     }
             }
 
-            if (pickedNewImage && selectedImageUri != null) {
-                val imageRef = FirebaseStorage.getInstance().reference
-                    .child("post_images/$postId.jpg")
+            fun saveWithImageIfNeeded(updateMap: MutableMap<String, Any>) {
+                if (pickedNewImage && selectedImageUri != null) {
+                    val imageRef = FirebaseStorage.getInstance().reference
+                        .child("post_images/$postId.jpg")
 
-                imageRef.putFile(selectedImageUri!!)
-                    .addOnSuccessListener {
-                        imageRef.downloadUrl
-                            .addOnSuccessListener { downloadUri ->
-                                baseUpdate["localImageUri"] = downloadUri.toString()
-                                savePost(baseUpdate)
-                            }
-                            .addOnFailureListener {
-                                // fallback to local uri if download URL retrieval fails
-                                savePost(baseUpdate)
-                            }
-                    }
-                    .addOnFailureListener {
-                        // if Storage upload is blocked by rules/network, still save the post
-                        // using local image URI so edit operation succeeds
-                        savePost(baseUpdate)
-                    }
+                    imageRef.putFile(selectedImageUri!!)
+                        .addOnSuccessListener {
+                            imageRef.downloadUrl
+                                .addOnSuccessListener { downloadUri ->
+                                    updateMap["localImageUri"] = downloadUri.toString()
+                                    savePost(updateMap)
+                                }
+                                .addOnFailureListener {
+                                    // fallback to local uri if download URL retrieval fails
+                                    savePost(updateMap)
+                                }
+                        }
+                        .addOnFailureListener {
+                            // if Storage upload is blocked by rules/network, still save the post
+                            // using local image URI so edit operation succeeds
+                            savePost(updateMap)
+                        }
+                } else {
+                    savePost(updateMap)
+                }
+            }
+
+            val locationChanged = !newLocation.equals(args.location, ignoreCase = true)
+            if (locationChanged) {
+                btnSave.text = "Updating destination info..."
+                viewLifecycleOwner.lifecycleScope.launch {
+                    runCatching { wikiRepo.fetchDestinationInfo(newLocation) }
+                        .onSuccess { info ->
+                            baseUpdate["wikiTitle"] = info.wikiTitle
+                            baseUpdate["wikiExtract"] = info.wikiExtract
+                            baseUpdate["wikiUrl"] = info.wikiUrl ?: ""
+                            baseUpdate["wikiImageUrl"] = info.wikiImageUrl ?: ""
+                        }
+                    saveWithImageIfNeeded(baseUpdate)
+                }
             } else {
-                savePost(baseUpdate)
+                saveWithImageIfNeeded(baseUpdate)
             }
         }
     }

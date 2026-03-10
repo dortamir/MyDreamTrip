@@ -155,19 +155,12 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:contentDescription="@null"
-                        android:src="@android:drawable/btn_star_big_on"
-                        app:tint="@color/mdt_primary" />
-
                     <TextView
                         android:id="@+id/txtDetailsRating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="4.8 (234)"
+                        android:layout_marginStart="0dp"
+                        android:text="⭐⭐⭐⭐"
                         android:textColor="@color/mdt_text_primary"
                         android:textSize="14sp" />
                 </LinearLayout>

@@ -31,6 +31,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
     private var wikiExtract: String = ""
     private var wikiUrl: String = ""
     private var wikiImageUrl: String = ""
+    private var selectedRating: Int = 0
 
     private val pickImage =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -55,18 +56,44 @@ class AddFragment : Fragment(R.layout.fragment_add) {
         val etTitle = view.findViewById<EditText>(R.id.etTitle)
         val etAboutTrip = view.findViewById<EditText>(R.id.etAboutTrip)
         val etLocation = view.findViewById<EditText>(R.id.etLocation)
-        val etRating = view.findViewById<EditText>(R.id.etRating)
         val btnBack = view.findViewById<ImageButton>(R.id.btnBackAdd)
         val tvStatus = view.findViewById<TextView>(R.id.tvAddStatus)
         val btnCreate = view.findViewById<Button>(R.id.btnCreatePost)
         val btnSelectPhoto = view.findViewById<Button>(R.id.btnSelectPhoto)
         val imgSelected = view.findViewById<ImageView>(R.id.imgSelected)
 
+        val ratingStars = listOf(
+            view.findViewById<TextView>(R.id.starRating1),
+            view.findViewById<TextView>(R.id.starRating2),
+            view.findViewById<TextView>(R.id.starRating3),
+            view.findViewById<TextView>(R.id.starRating4),
+            view.findViewById<TextView>(R.id.starRating5)
+        )
+
+        fun renderRatingStars(value: Int) {
+            ratingStars.forEachIndexed { idx, star ->
+                if (idx < value) {
+                    star.text = "⭐"
+                    star.setTextColor(android.graphics.Color.parseColor("#FFC107"))
+                } else {
+                    star.text = "☆"
+                    star.setTextColor(android.graphics.Color.parseColor("#999999"))
+                }
+            }
+        }
+
+        ratingStars.forEachIndexed { idx, star ->
+            star.setOnClickListener {
+                selectedRating = idx + 1
+                renderRatingStars(selectedRating)
+            }
+        }
+        renderRatingStars(0)
+
         val btnFetch = view.findViewById<Button>(R.id.btnFetchDestinationInfo)
         val progress = view.findViewById<ProgressBar>(R.id.progressDestination)
         val txtWikiTitle = view.findViewById<TextView>(R.id.txtDestinationTitle)
         val txtWikiExtract = view.findViewById<TextView>(R.id.txtDestinationExtract)
-        val txtWikiUrl = view.findViewById<TextView>(R.id.txtDestinationUrl)
 
         btnBack.setOnClickListener {
             findNavController().popBackStack()
@@ -79,23 +106,25 @@ class AddFragment : Fragment(R.layout.fragment_add) {
             etTitle.isEnabled = enabled
             etAboutTrip.isEnabled = enabled
             etLocation.isEnabled = enabled
-            etRating.isEnabled = enabled
+            ratingStars.forEach { star ->
+                star.isEnabled = enabled
+                star.alpha = if (enabled) 1f else 0.5f
+            }
         }
 
         fun clearWikiPreview() {
             txtWikiTitle.visibility = View.GONE
             txtWikiExtract.visibility = View.GONE
-            txtWikiUrl.visibility = View.GONE
             txtWikiTitle.text = ""
             txtWikiExtract.text = ""
-            txtWikiUrl.text = ""
         }
 
         fun clearForm() {
             etTitle.setText("")
             etAboutTrip.setText("")
             etLocation.setText("")
-            etRating.setText("")
+            selectedRating = 0
+            renderRatingStars(0)
             selectedImageUri = null
             imgSelected.setImageResource(android.R.drawable.ic_menu_gallery)
 
@@ -163,11 +192,9 @@ class AddFragment : Fragment(R.layout.fragment_add) {
 
                         txtWikiTitle.visibility = View.VISIBLE
                         txtWikiExtract.visibility = View.VISIBLE
-                        txtWikiUrl.visibility = View.VISIBLE
 
                         txtWikiTitle.text = wikiTitle
                         txtWikiExtract.text = wikiExtract
-                        txtWikiUrl.text = wikiUrl
                     }
                     is DestinationInfoState.Error -> {
                         progress.visibility = View.GONE
@@ -182,12 +209,13 @@ class AddFragment : Fragment(R.layout.fragment_add) {
             val title = etTitle.text.toString().trim()
             val aboutTrip = etAboutTrip.text.toString().trim()
             val location = etLocation.text.toString().trim()
-            val ratingText = etRating.text.toString().trim()
 
             if (title.isBlank() || location.isBlank()) {
                 tvStatus.text = "Please fill in all fields"
                 return@setOnClickListener
             }
+
+            val ratingText = "⭐".repeat(selectedRating.coerceIn(0, 5))
 
             setFormEnabled(false)
             progress.visibility = View.GONE
@@ -212,13 +240,17 @@ class AddFragment : Fragment(R.layout.fragment_add) {
 
                 tvStatus.text = "Creating post..."
 
+                val currentUser = FirebaseAuth.getInstance().currentUser
+                val authorPhotoUrl = currentUser?.photoUrl?.toString() ?: ""
+
                 val data = hashMapOf(
                     "title" to title,
                     "aboutTrip" to aboutTrip,
                     "location" to location,
-                    "ratingText" to if (ratingText.isBlank()) "⭐ 0.0 (0)" else ratingText,
+                    "ratingText" to ratingText,
                     "author" to author,
                     "localImageUri" to (selectedImageUri?.toString() ?: ""),
+                    "authorPhotoUrl" to authorPhotoUrl,
                     "createdAt" to FieldValue.serverTimestamp(),
 
                     // Wikipedia fields

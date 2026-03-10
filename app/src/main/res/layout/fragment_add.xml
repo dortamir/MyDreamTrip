@@ -124,18 +124,70 @@
                     android:layout_marginTop="6dp"/>
 
                 <TextView
-                    android:id="@+id/txtDestinationUrl"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_marginTop="6dp"/>
+                    android:layout_marginTop="12dp"
+                    android:text="Rate Your Trip"
+                    android:textSize="16sp"
+                    android:textColor="@color/mdt_text_secondary"/>
 
-                <EditText
-                    android:id="@+id/etRating"
+                <LinearLayout
+                    android:id="@+id/ratingRowAdd"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Rate 1-5 Stars⭐ "
-                    android:layout_marginTop="12dp"/>
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/starRating1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/starRating2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/starRating3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/starRating4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/starRating5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp" />
+                </LinearLayout>
 
                 <Button
                     android:id="@+id/btnCreatePost"

@@ -22,7 +22,6 @@ class DestinationAdapter(
         val location: TextView = itemView.findViewById(R.id.txtLocation)
         val rating: TextView = itemView.findViewById(R.id.txtRating)
         val author: TextView = itemView.findViewById(R.id.txtAuthor)
-        val imgAuthor: ImageView = itemView.findViewById(R.id.imgAuthor)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -36,7 +35,7 @@ class DestinationAdapter(
 
         holder.title.text = item.title
         holder.location.text = item.location
-        holder.rating.text = item.ratingText
+        holder.rating.text = normalizeRating(item.ratingText)
         holder.author.text = item.author
 
         val uriStr = item.localImageUri
@@ -52,23 +51,20 @@ class DestinationAdapter(
             holder.imgCover.setImageResource(item.imageRes)
         }
 
-        val authorPhoto = item.authorPhotoUrl
-        if (!authorPhoto.isNullOrBlank()) {
-            Picasso.get()
-                .load(authorPhoto)
-                .placeholder(R.drawable.ic_profile)
-                .error(R.drawable.ic_profile)
-                .fit()
-                .centerCrop()
-                .into(holder.imgAuthor)
-        } else {
-            holder.imgAuthor.setImageResource(R.drawable.ic_profile)
-        }
-
         holder.itemView.setOnClickListener { onClick(item) }
     }
 
     override fun getItemCount(): Int = items.size
+
+    private fun normalizeRating(raw: String): String {
+        val stars = raw.count { it == '⭐' }
+        if (stars in 1..5) return "⭐".repeat(stars)
+
+        val numeric = raw.toIntOrNull()
+        if (numeric != null && numeric in 1..5) return "⭐".repeat(numeric)
+
+        return raw
+    }
 
     fun submitList(newItems: List<Destination>) {
         items = newItems
