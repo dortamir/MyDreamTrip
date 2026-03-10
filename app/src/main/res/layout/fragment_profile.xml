@@ -22,8 +22,8 @@
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imgProfileThumb"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="85dp"
+            android:layout_height="105dp"
             android:src="@drawable/ic_profile"
             app:shapeAppearanceOverlay="@style/MdtSquareImage" />
 
@@ -58,7 +58,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="9dp"
         android:gravity="center_horizontal">
 
         <Button
@@ -84,7 +84,7 @@
         android:textStyle="bold"
         android:textSize="18sp"
         android:textColor="#2EC4C6"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="15dp"/>
 
     <TextView
         android:id="@+id/tvEmptyMyPosts"
@@ -98,7 +98,7 @@
         android:id="@+id/rvMyPosts"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="7dp"
         android:layout_weight="1"/>
 
 </LinearLayout>

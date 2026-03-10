@@ -264,7 +264,18 @@ class AddFragment : Fragment(R.layout.fragment_add) {
                 tvStatus.text = "Creating post..."
 
                 val currentUser = FirebaseAuth.getInstance().currentUser
-                val authorPhotoUrl = currentUser?.photoUrl?.toString() ?: ""
+                val authorUid = currentUser?.uid ?: ""
+                val cachedPhotoRef = if (authorUid.isNotBlank()) {
+                    requireContext()
+                        .getSharedPreferences("profile_cache", android.content.Context.MODE_PRIVATE)
+                        .getString("photo_ref_$authorUid", "")
+                        .orEmpty()
+                } else {
+                    ""
+                }
+                val authorPhotoUrl = currentUser?.photoUrl?.toString()
+                    ?.takeIf { it.isNotBlank() }
+                    ?: cachedPhotoRef
 
                 val data = hashMapOf(
                     "title" to title,
@@ -272,6 +283,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
                     "location" to location,
                     "ratingText" to ratingText,
                     "author" to author,
+                    "authorUid" to authorUid,
                     "localImageUri" to (selectedImageUri?.toString() ?: ""),
                     "authorPhotoUrl" to authorPhotoUrl,
                     "createdAt" to FieldValue.serverTimestamp(),

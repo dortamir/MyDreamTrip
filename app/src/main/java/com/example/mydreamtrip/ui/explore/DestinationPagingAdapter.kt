@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mydreamtrip.R
 import com.example.mydreamtrip.model.Destination
+import com.google.firebase.firestore.FirebaseFirestore
 import com.squareup.picasso.Picasso
 
 class DestinationPagingAdapter(
@@ -19,6 +20,7 @@ class DestinationPagingAdapter(
 
     class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imgCover: ImageView = itemView.findViewById(R.id.imgCover)
+        val imgAuthor: ImageView = itemView.findViewById(R.id.imgAuthor)
         val title: TextView = itemView.findViewById(R.id.txtCardTitle)
         val location: TextView = itemView.findViewById(R.id.txtLocation)
         val rating: TextView = itemView.findViewById(R.id.txtRating)
@@ -39,6 +41,50 @@ class DestinationPagingAdapter(
         holder.rating.text = normalizeRating(item.ratingText)
         holder.author.text = item.author
 
+        if (item.authorPhotoUrl.isNotBlank()) {
+            Picasso.get()
+                .load(item.authorPhotoUrl)
+                .placeholder(R.drawable.ic_profile)
+                .error(R.drawable.ic_profile)
+                .fit()
+                .centerCrop()
+                .into(holder.imgAuthor)
+        } else if (item.authorUid.isNotBlank()) {
+            val cached = photoCache[item.authorUid]
+            if (cached != null) {
+                Picasso.get()
+                    .load(cached)
+                    .placeholder(R.drawable.ic_profile)
+                    .error(R.drawable.ic_profile)
+                    .fit()
+                    .centerCrop()
+                    .into(holder.imgAuthor)
+            } else {
+                holder.imgAuthor.setImageResource(R.drawable.ic_profile)
+                FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(item.authorUid)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        val url = snapshot.getString("photoUrl")?.takeIf { it.isNotBlank() }
+                            ?: snapshot.getString("photoLocalUri")?.takeIf { it.isNotBlank() }
+                            ?: return@addOnSuccessListener
+                        photoCache[item.authorUid] = url
+                        if (holder.bindingAdapterPosition != RecyclerView.NO_POSITION) {
+                            Picasso.get()
+                                .load(url)
+                                .placeholder(R.drawable.ic_profile)
+                                .error(R.drawable.ic_profile)
+                                .fit()
+                                .centerCrop()
+                                .into(holder.imgAuthor)
+                        }
+                    }
+            }
+        } else {
+            holder.imgAuthor.setImageResource(R.drawable.ic_profile)
+        }
+
         val uriStr = item.localImageUri
         if (!uriStr.isNullOrBlank()) {
             Picasso.get()
@@ -56,6 +102,8 @@ class DestinationPagingAdapter(
     }
 
     companion object {
+        private val photoCache = mutableMapOf<String, String>()
+
         private fun normalizeRating(raw: String): String {
             val stars = raw.count { it == '⭐' }
             if (stars in 1..5) return "⭐".repeat(stars)

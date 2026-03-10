@@ -40,8 +40,8 @@
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imgProfileEdit"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
             android:layout_marginTop="16dp"
             android:layout_gravity="center_horizontal"
             android:src="@drawable/ic_profile"
@@ -52,7 +52,7 @@
             android:id="@+id/btnChangePhoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_camera"
+            android:src="@drawable/ic_edit"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="-24dp"
             android:tint="@android:color/white"

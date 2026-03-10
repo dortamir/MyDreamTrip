@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.content.Context
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -13,12 +14,16 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textfield.TextInputEditText
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
 
 class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
 
     private var selectedImageUri: Uri? = null
+    private var resolvedPhotoRef: String = ""
 
     private val pickImage =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -47,6 +52,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
             findNavController().navigate(R.id.loginFragment)
             return
         }
+        val previousAuthor = user.email?.substringBefore("@") ?: ""
 
         val etName = view.findViewById<TextInputEditText>(R.id.etFullNameEdit)
         val etEmail = view.findViewById<TextInputEditText>(R.id.etEmailEdit)
@@ -61,6 +67,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         user.photoUrl?.let {
             Picasso.get().load(it).fit().centerCrop().into(img)
         }
+        resolvedPhotoRef = user.photoUrl?.toString() ?: ""
 
         btnPhoto.setOnClickListener { pickImage.launch(arrayOf("image/*")) }
 
@@ -107,22 +114,114 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
                 profileRef.putFile(uri)
                     .addOnSuccessListener {
                         profileRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                            resolvedPhotoRef = downloadUri.toString()
                             val photoReq = com.google.firebase.auth.UserProfileChangeRequest.Builder()
                                 .setPhotoUri(downloadUri)
                                 .build()
-                            user.updateProfile(photoReq).addOnCompleteListener { onDone() }
-                        }.addOnFailureListener { onDone() }
+                            user.updateProfile(photoReq)
+                                .addOnSuccessListener { onDone() }
+                                .addOnFailureListener {
+                                    btnSave.isEnabled = true
+                                    tvStatus.text = it.message ?: "Failed to update profile photo"
+                                }
+                        }.addOnFailureListener {
+                            resolvedPhotoRef = uri.toString()
+                            val localReq = com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                                .setPhotoUri(uri)
+                                .build()
+                            user.updateProfile(localReq)
+                                .addOnCompleteListener { onDone() }
+                        }
+                    }
+                    .addOnFailureListener {
+                        resolvedPhotoRef = uri.toString()
+                        val localReq = com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                            .setPhotoUri(uri)
+                            .build()
+                        user.updateProfile(localReq)
+                            .addOnCompleteListener { onDone() }
+                    }
+            }
+
+            // execute updates chain
+            fun syncUserData(onDone: () -> Unit) {
+                val reloadedUser = FirebaseAuth.getInstance().currentUser
+                if (reloadedUser == null) {
+                    onDone()
+                    return
+                }
+
+                val photoRef = resolvedPhotoRef.ifBlank {
+                    reloadedUser.photoUrl?.toString() ?: ""
+                }
+                val isRemotePhoto = photoRef.startsWith("http://") || photoRef.startsWith("https://")
+                val emailNow = reloadedUser.email ?: email
+                val displayNameNow = reloadedUser.displayName ?: name
+                val authorNow = emailNow.substringBefore("@")
+
+                requireContext()
+                    .getSharedPreferences("profile_cache", Context.MODE_PRIVATE)
+                    .edit()
+                    .putString("photo_ref_${reloadedUser.uid}", photoRef)
+                    .apply()
+
+                val profileData = hashMapOf(
+                    "uid" to reloadedUser.uid,
+                    "email" to emailNow,
+                    "displayName" to displayNameNow,
+                    "photoUrl" to (if (isRemotePhoto) photoRef else ""),
+                    "photoLocalUri" to (if (photoRef.isNotBlank() && !isRemotePhoto) photoRef else ""),
+                    "updatedAt" to FieldValue.serverTimestamp()
+                )
+
+                val firestore = FirebaseFirestore.getInstance()
+                firestore.collection("users")
+                    .document(reloadedUser.uid)
+                    .set(profileData, SetOptions.merge())
+                    .addOnSuccessListener {
+                        firestore.collection("posts")
+                            .whereEqualTo("authorUid", reloadedUser.uid)
+                            .get()
+                            .addOnSuccessListener { snapshotByUid ->
+                                firestore.collection("posts")
+                                    .whereEqualTo("author", previousAuthor)
+                                    .get()
+                                    .addOnSuccessListener { snapshotByAuthor ->
+                                val batch = firestore.batch()
+                                val allDocs = LinkedHashMap<String, com.google.firebase.firestore.DocumentSnapshot>()
+                                snapshotByUid.documents.forEach { allDocs[it.id] = it }
+                                snapshotByAuthor.documents.forEach { allDocs[it.id] = it }
+
+                                allDocs.values.forEach { doc ->
+                                    batch.update(doc.reference, mapOf(
+                                        "authorUid" to reloadedUser.uid,
+                                        "authorPhotoUrl" to photoRef,
+                                        "author" to authorNow
+                                    ))
+                                }
+                                if (allDocs.isEmpty()) {
+                                    onDone()
+                                } else {
+                                    batch.commit().addOnCompleteListener { onDone() }
+                                }
+                            }
+                                    .addOnFailureListener { onDone() }
+                            }
+                            .addOnFailureListener { onDone() }
                     }
                     .addOnFailureListener { onDone() }
             }
 
-            // execute updates chain
             fun runNext() {
                 if (updates.isEmpty()) {
                     uploadPhotoAndContinue {
-                        Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
-                        findNavController().previousBackStackEntry?.savedStateHandle?.set("profileUpdated", true)
-                        findNavController().popBackStack()
+                        user.reload().addOnCompleteListener {
+                            syncUserData {
+                                Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
+                                findNavController().previousBackStackEntry?.savedStateHandle?.set("profileUpdated", true)
+                                findNavController().popBackStack()
+                            }
+                        }
                     }
                     return
                 }
