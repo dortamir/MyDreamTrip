@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -90,14 +91,36 @@ class AddFragment : Fragment(R.layout.fragment_add) {
         }
         renderRatingStars(0)
 
+        // Function to check if there are unsaved changes
+        fun hasUnsavedChanges(): Boolean {
+            val hasTitle = etTitle.text.toString().trim().isNotEmpty()
+            val hasLocation = etLocation.text.toString().trim().isNotEmpty()
+            val hasAboutTrip = etAboutTrip.text.toString().trim().isNotEmpty()
+            val hasPhoto = selectedImageUri != null
+            val hasRating = selectedRating > 0
+            
+            return hasTitle || hasLocation || hasAboutTrip || hasPhoto || hasRating
+        }
+
+        btnBack.setOnClickListener {
+            if (hasUnsavedChanges()) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Discard Post?")
+                    .setMessage("Your post content will be lost. Are you sure you want to discard it?")
+                    .setPositiveButton("Discard") { _, _ ->
+                        findNavController().popBackStack()
+                    }
+                    .setNegativeButton("Keep Editing", null)
+                    .show()
+            } else {
+                findNavController().popBackStack()
+            }
+        }
+
         val btnFetch = view.findViewById<Button>(R.id.btnFetchDestinationInfo)
         val progress = view.findViewById<ProgressBar>(R.id.progressDestination)
         val txtWikiTitle = view.findViewById<TextView>(R.id.txtDestinationTitle)
         val txtWikiExtract = view.findViewById<TextView>(R.id.txtDestinationExtract)
-
-        btnBack.setOnClickListener {
-            findNavController().popBackStack()
-        }
 
         fun setFormEnabled(enabled: Boolean) {
             btnCreate.isEnabled = enabled

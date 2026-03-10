@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
@@ -93,9 +94,34 @@ class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
             }
         }
 
+        // Function to check if there are unsaved changes
+        fun hasUnsavedChanges(): Boolean {
+            val currentTitle = etTitle.text.toString().trim()
+            val currentAboutTrip = etAboutTrip.text.toString().trim()
+            val currentLocation = etLocation.text.toString().trim()
+            
+            val titleChanged = currentTitle != args.title
+            val locationChanged = currentLocation != args.location
+            val ratingChanged = selectedRating != args.ratingText.count { it == '⭐' }
+            val photoChanged = pickedNewImage
+            
+            return titleChanged || locationChanged || ratingChanged || photoChanged
+        }
+
         // Set up back button
         btnBack.setOnClickListener {
-            findNavController().popBackStack()
+            if (hasUnsavedChanges()) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Unsaved Changes")
+                    .setMessage("You have unsaved changes. Are you sure you want to leave without saving?")
+                    .setPositiveButton("Leave") { _, _ ->
+                        findNavController().popBackStack()
+                    }
+                    .setNegativeButton("Continue Editing", null)
+                    .show()
+            } else {
+                findNavController().popBackStack()
+            }
         }
 
         // Prefill fields
