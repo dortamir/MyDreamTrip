@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.content.Context
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -14,6 +15,8 @@ import android.content.Intent
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.imageview.ShapeableImageView
 import com.squareup.picasso.Picasso
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
 class SignupFragment : Fragment(R.layout.fragment_signup) {
@@ -32,6 +35,7 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
                 } catch (_: Exception) {}
 
                 view?.findViewById<ShapeableImageView>(R.id.imgProfile)?.let { img ->
+                    img.alpha = 1f
                     Picasso.get().load(uri).fit().centerCrop().into(img)
                 }
             }
@@ -78,31 +82,74 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
                 .createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener { authResult ->
                     val user = authResult.user
-                    val profileUpdates = com.google.firebase.auth.UserProfileChangeRequest.Builder()
-                        .setDisplayName(fullName)
-                        .build()
-                    user?.updateProfile(profileUpdates)
+                    if (user == null) {
+                        tvError.text = "Signup failed"
+                        return@addOnSuccessListener
+                    }
 
-                    // Upload profile image if selected
-                    selectedImageUri?.let { uri ->
-                        val storageRef = FirebaseStorage.getInstance().reference
-                        val profileRef = storageRef.child("profile_images/${user?.uid}.jpg")
-                        profileRef.putFile(uri)
+                    fun completeSignup(photoUri: Uri?) {
+                        val photoRef = photoUri?.toString().orEmpty()
+                        val isRemotePhoto = photoRef.startsWith("http://") || photoRef.startsWith("https://")
+
+                        val profileUpdates = com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                            .setDisplayName(fullName)
+                            .apply { if (photoUri != null) setPhotoUri(photoUri) }
+                            .build()
+
+                        user.updateProfile(profileUpdates)
                             .addOnSuccessListener {
-                                profileRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                                    val photoUpdates = com.google.firebase.auth.UserProfileChangeRequest.Builder()
-                                        .setPhotoUri(downloadUri)
-                                        .build()
-                                    user?.updateProfile(photoUpdates)
-                                }
+                                val userDoc = hashMapOf(
+                                    "uid" to user.uid,
+                                    "email" to email,
+                                    "displayName" to fullName,
+                                    "photoUrl" to (if (isRemotePhoto) photoRef else ""),
+                                    "photoLocalUri" to (if (photoRef.isNotBlank() && !isRemotePhoto) photoRef else ""),
+                                    "updatedAt" to FieldValue.serverTimestamp(),
+                                    "createdAt" to FieldValue.serverTimestamp()
+                                )
+
+                                requireContext()
+                                    .getSharedPreferences("profile_cache", Context.MODE_PRIVATE)
+                                    .edit()
+                                    .putString("photo_ref_${user.uid}", photoRef)
+                                    .apply()
+
+                                FirebaseFirestore.getInstance()
+                                    .collection("users")
+                                    .document(user.uid)
+                                    .set(userDoc, com.google.firebase.firestore.SetOptions.merge())
+                                    .addOnCompleteListener {
+                                        user.reload().addOnCompleteListener {
+                                            val intent = Intent(requireContext(), MainActivity::class.java)
+                                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                            startActivity(intent)
+                                            requireActivity().finish()
+                                        }
+                                    }
+                            }
+                            .addOnFailureListener { e ->
+                                tvError.text = e.message ?: "Failed to save profile"
                             }
                     }
 
-                    val intent = Intent(requireContext(), MainActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-
-                    requireActivity().finish()
+                    val localUri = selectedImageUri
+                    if (localUri == null) {
+                        completeSignup(null)
+                    } else {
+                        val storageRef = FirebaseStorage.getInstance().reference
+                        val profileRef = storageRef.child("profile_images/${user.uid}.jpg")
+                        profileRef.putFile(localUri)
+                            .addOnSuccessListener {
+                                profileRef.downloadUrl
+                                    .addOnSuccessListener { downloadUri -> completeSignup(downloadUri) }
+                                    .addOnFailureListener {
+                                        completeSignup(localUri)
+                                    }
+                            }
+                            .addOnFailureListener {
+                                completeSignup(localUri)
+                            }
+                    }
                 }
                 .addOnFailureListener { e ->
                     tvError.text = e.message ?: "Signup failed"

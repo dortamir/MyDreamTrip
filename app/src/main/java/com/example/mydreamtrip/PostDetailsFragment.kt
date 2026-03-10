@@ -22,15 +22,26 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
     private lateinit var commentAdapter: CommentAdapter
     private val db by lazy { FirebaseFirestore.getInstance() }
 
+    private fun normalizeRating(raw: String): String {
+        val stars = raw.count { it == '⭐' }
+        if (stars in 1..5) return "⭐".repeat(stars)
+
+        val numeric = raw.toIntOrNull()
+        if (numeric != null && numeric in 1..5) return "⭐".repeat(numeric)
+
+        return raw
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val args = PostDetailsFragmentArgs.fromBundle(requireArguments())
 
-        // ---- Main post UI ----
         view.findViewById<TextView>(R.id.txtDetailsTitle).text = args.title
+        val txtDetailsAbout = view.findViewById<TextView>(R.id.txtDetailsAbout)
+        txtDetailsAbout.visibility = View.GONE
         view.findViewById<TextView>(R.id.txtDetailsLocation).text = args.location
-        view.findViewById<TextView>(R.id.txtDetailsRating).text = args.ratingText
+        view.findViewById<TextView>(R.id.txtDetailsRating).text = normalizeRating(args.ratingText)
         view.findViewById<TextView>(R.id.txtDetailsAuthor).text = args.author
 
         val imgDetails = view.findViewById<ImageView>(R.id.imgDetails)
@@ -46,10 +57,10 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
             imgDetails.setImageResource(args.imageRes)
         }
 
-        // ---- Top buttons ----
         val btnDelete = view.findViewById<ImageButton>(R.id.btnDeletePost)
         val btnEdit = view.findViewById<ImageButton>(R.id.btnEditPost)
         val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
+        val buttonsContainer = view.findViewById<LinearLayout>(R.id.buttonsContainer)
 
         btnBack.setOnClickListener { findNavController().popBackStack() }
 
@@ -57,10 +68,61 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
         val currentUsername = currentEmail?.substringBefore("@")
         val isOwner = !currentUsername.isNullOrBlank() && currentUsername.equals(args.author, ignoreCase = true)
 
-        btnDelete.visibility = if (isOwner) View.VISIBLE else View.GONE
-        btnEdit.visibility = if (isOwner) View.VISIBLE else View.GONE
+        buttonsContainer?.visibility = if (isOwner) View.VISIBLE else View.GONE
 
         val postRef = db.collection("posts").document(args.postId)
+
+        val wikiBox = view.findViewById<View>(R.id.wikiBox)
+        val wikiTitle = view.findViewById<TextView>(R.id.txtWikiTitle)
+        val wikiExtract = view.findViewById<TextView>(R.id.txtWikiExtract)
+        val btnOpenWiki = view.findViewById<Button>(R.id.btnOpenWiki)
+
+        postRef.addSnapshotListener { snapshot, error ->
+            if (error != null || snapshot == null || !snapshot.exists()) return@addSnapshotListener
+
+            val updatedTitle = snapshot.getString("title") ?: args.title
+            val updatedAboutTrip = snapshot.getString("aboutTrip") ?: ""
+            val updatedLocation = snapshot.getString("location") ?: args.location
+            val updatedRating = snapshot.getString("ratingText") ?: args.ratingText
+            val updatedAuthor = snapshot.getString("author") ?: args.author
+            val updatedLocalUri = snapshot.getString("localImageUri") ?: ""
+            val updatedWikiTitle = snapshot.getString("wikiTitle") ?: ""
+            val updatedWikiExtract = snapshot.getString("wikiExtract") ?: ""
+            val updatedWikiUrl = snapshot.getString("wikiUrl") ?: ""
+
+            view.findViewById<TextView>(R.id.txtDetailsTitle).text = updatedTitle
+            if (updatedAboutTrip.isNotBlank()) {
+                txtDetailsAbout.visibility = View.VISIBLE
+                txtDetailsAbout.text = updatedAboutTrip
+            } else {
+                txtDetailsAbout.visibility = View.GONE
+            }
+            view.findViewById<TextView>(R.id.txtDetailsLocation).text = updatedLocation
+            view.findViewById<TextView>(R.id.txtDetailsRating).text = normalizeRating(updatedRating)
+            view.findViewById<TextView>(R.id.txtDetailsAuthor).text = updatedAuthor
+
+            if (updatedLocalUri.isNotBlank()) {
+                Picasso.get().load(Uri.parse(updatedLocalUri)).fit().centerCrop()
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_gallery)
+                    .into(imgDetails)
+            } else {
+                imgDetails.setImageResource(args.imageRes)
+            }
+
+            if (updatedWikiTitle.isNotBlank() || updatedWikiExtract.isNotBlank() || updatedWikiUrl.isNotBlank()) {
+                wikiBox.visibility = View.VISIBLE
+                wikiTitle.text = if (updatedWikiTitle.isNotBlank()) updatedWikiTitle else updatedLocation
+                wikiExtract.text = updatedWikiExtract
+                btnOpenWiki.isEnabled = updatedWikiUrl.isNotBlank()
+                btnOpenWiki.setOnClickListener {
+                    if (updatedWikiUrl.isBlank()) return@setOnClickListener
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(updatedWikiUrl)))
+                }
+            } else {
+                wikiBox.visibility = View.GONE
+            }
+        }
 
         btnDelete.setOnClickListener {
             AlertDialog.Builder(requireContext())
@@ -87,16 +149,11 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
                     title = args.title,
                     location = args.location,
                     ratingText = args.ratingText,
-                    imageRes = args.imageRes
+                    imageRes = args.imageRes,
+                    localImageUri = args.localImageUri ?: ""
                 )
             findNavController().navigate(action)
         }
-
-        // ---- Wikipedia section ----
-        val wikiBox = view.findViewById<View>(R.id.wikiBox)
-        val wikiTitle = view.findViewById<TextView>(R.id.txtWikiTitle)
-        val wikiExtract = view.findViewById<TextView>(R.id.txtWikiExtract)
-        val btnOpenWiki = view.findViewById<Button>(R.id.btnOpenWiki)
 
         val hasWiki = args.wikiTitle.isNotBlank() || args.wikiExtract.isNotBlank() || args.wikiUrl.isNotBlank()
 
@@ -115,11 +172,12 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
             wikiBox.visibility = View.GONE
         }
 
-        // ---- Comments ----
         val rv = view.findViewById<RecyclerView>(R.id.rvComments)
         rv.layoutManager = LinearLayoutManager(requireContext())
-        commentAdapter = CommentAdapter(mutableListOf())
+        commentAdapter = CommentAdapter(mutableListOf(), currentUsername)
         rv.adapter = commentAdapter
+
+        val tvNoComments = view.findViewById<TextView>(R.id.tvNoComments)
 
         postRef.collection("comments")
             .orderBy("createdAt", Query.Direction.DESCENDING)
@@ -129,10 +187,33 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
                 val list = snapshot.documents.mapNotNull { doc ->
                     val a = doc.getString("author") ?: return@mapNotNull null
                     val t = doc.getString("text") ?: return@mapNotNull null
-                    Comment(a, t)
+                    Comment(doc.id, a, t)
                 }
-                commentAdapter = CommentAdapter(list.toMutableList())
+                val onDeleteComment: (Comment) -> Unit = { comment ->
+                    if (currentUsername.isNullOrBlank() || !comment.author.equals(currentUsername, ignoreCase = true)) {
+                        Toast.makeText(requireContext(), "You can delete only your comments", Toast.LENGTH_SHORT).show()
+                    } else {
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("Delete comment?")
+                            .setMessage("Are you sure you want to delete this comment?")
+                            .setPositiveButton("Delete") { _, _ ->
+                                postRef.collection("comments").document(comment.id).delete()
+                                    .addOnSuccessListener {
+                                        Toast.makeText(requireContext(), "Comment deleted", Toast.LENGTH_SHORT).show()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Toast.makeText(requireContext(), e.message ?: "Delete failed", Toast.LENGTH_LONG).show()
+                                    }
+                            }
+                            .setNegativeButton("Cancel", null)
+                            .show()
+                    }
+                }
+                
+                commentAdapter = CommentAdapter(list.toMutableList(), currentUsername, onDeleteComment)
                 rv.adapter = commentAdapter
+
+                tvNoComments.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
             }
 
         val etComment = view.findViewById<EditText>(R.id.etComment)
@@ -155,3 +236,5 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
         }
     }
 }
+
+

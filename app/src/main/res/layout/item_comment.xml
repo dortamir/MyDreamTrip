@@ -1,35 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
-    app:cardCornerRadius="14dp"
-    app:cardUseCompatPadding="true">
+    android:orientation="vertical"
+    android:layout_marginBottom="12dp">
 
-    <LinearLayout
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="12dp">
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="@color/mdt_surface">
 
-        <TextView
-            android:id="@+id/txtCommentAuthor"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Dor"
-            android:textStyle="bold"
-            android:textSize="14sp"/>
-
-        <TextView
-            android:id="@+id/txtCommentText"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Amazing place!"
-            android:textSize="14sp"
-            android:layout_marginTop="4dp"/>
+            android:orientation="horizontal"
+            android:padding="12dp">
 
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-</com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:id="@+id/txtCommentAuthor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Author Name"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="@color/mdt_text_primary"/>
+
+                <TextView
+                    android:id="@+id/txtCommentText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Comment text here"
+                    android:textSize="13sp"
+                    android:textColor="@color/mdt_text_secondary"
+                    android:layout_marginTop="4dp"
+                    android:lineSpacingMultiplier="1.2"/>
+
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/btnDeleteComment"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:layout_gravity="center_vertical"
+                android:scaleType="fitCenter"
+                android:background="?attr/selectableItemBackground"
+                android:src="@drawable/ic_delete"
+                android:contentDescription="Delete comment"
+                android:tint="@color/mdt_text_secondary"/>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

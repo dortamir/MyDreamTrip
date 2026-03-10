@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -9,109 +11,200 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <ImageView
-            android:id="@+id/imgSelected"
-            android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:scaleType="centerCrop"
-            android:src="@android:drawable/ic_menu_gallery"
-            android:contentDescription="@null"
-            android:layout_marginBottom="12dp"/>
-
-        <Button
-            android:id="@+id/btnSelectPhoto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Select Photo"
-            android:layout_marginBottom="16dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add Post"
-            android:textStyle="bold"
-            android:textSize="22sp" />
-
-        <EditText
-            android:id="@+id/etTitle"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Title"
-            android:layout_marginTop="14dp"/>
+            app:cardCornerRadius="18dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@color/mdt_surface">
 
-        <EditText
-            android:id="@+id/etLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Location (e.g., Rome, Italy)"
-            android:layout_marginTop="10dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp">
 
-        <Button
-            android:id="@+id/btnFetchDestinationInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Get destination info"
-            android:layout_marginTop="10dp"/>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp">
 
-        <ProgressBar
-            android:id="@+id/progressDestination"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_marginTop="10dp"/>
+                    <ImageView
+                        android:id="@+id/imgSelected"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@android:drawable/ic_menu_gallery"
+                        android:contentDescription="@null"/>
 
-        <ImageView
-            android:id="@+id/imgDestinationPreview"
-            android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:scaleType="centerCrop"
-            android:visibility="gone"
-            android:contentDescription="@null"
-            android:layout_marginTop="10dp"/>
+                    <com.google.android.material.card.MaterialCardView
+                        style="@style/MdtCard"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_margin="12dp"
+                        app:cardBackgroundColor="@color/mdt_surface"
+                        android:layout_gravity="top|start">
 
-        <TextView
-            android:id="@+id/txtDestinationTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:visibility="gone"
-            android:layout_marginTop="10dp"/>
+                        <ImageButton
+                            android:id="@+id/btnBackAdd"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@android:color/transparent"
+                            android:src="@drawable/ic_back"
+                            app:tint="@color/mdt_text_primary"
+                            android:contentDescription="Back"/>
+                    </com.google.android.material.card.MaterialCardView>
+                </FrameLayout>
 
-        <TextView
-            android:id="@+id/txtDestinationExtract"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_marginTop="6dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Add Post"
+                    android:textStyle="bold"
+                    android:textSize="24sp"
+                    android:textColor="@color/mdt_text_primary"/>
 
-        <TextView
-            android:id="@+id/txtDestinationUrl"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_marginTop="6dp"/>
+                <Button
+                    android:id="@+id/btnSelectPhoto"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Select Photo"/>
 
-        <EditText
-            android:id="@+id/etRating"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Rating text (e.g., ⭐ 4.8 (234))"
-            android:layout_marginTop="10dp"/>
+                <EditText
+                    android:id="@+id/etTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Post Title"
+                    android:layout_marginTop="12dp"/>
 
-        <Button
-            android:id="@+id/btnCreatePost"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Create"
-            android:layout_marginTop="16dp" />
+                <EditText
+                    android:id="@+id/etAboutTrip"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:hint="About My Trip"/>
 
-        <TextView
-            android:id="@+id/tvAddStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:layout_marginTop="10dp"/>
+                <EditText
+                    android:id="@+id/etLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Destination Name"
+                    android:layout_marginTop="10dp"/>
+
+                <Button
+                    android:id="@+id/btnFetchDestinationInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Get destination info"
+                    android:layout_marginTop="10dp"/>
+
+                <ProgressBar
+                    android:id="@+id/progressDestination"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="gone"
+                    android:layout_marginTop="10dp"/>
+
+                <TextView
+                    android:id="@+id/txtDestinationTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    android:layout_marginTop="10dp"/>
+
+                <TextView
+                    android:id="@+id/txtDestinationExtract"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginTop="6dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Rate Your Trip"
+                    android:textSize="16sp"
+                    android:textColor="@color/mdt_text_secondary"/>
+
+                <LinearLayout
+                    android:id="@+id/ratingRowAdd"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/starRating1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/starRating2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/starRating3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/starRating4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/starRating5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnCreatePost"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Create"
+                    android:layout_marginTop="14dp" />
+
+                <TextView
+                    android:id="@+id/tvAddStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:layout_marginTop="10dp"/>
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 </ScrollView>

@@ -11,6 +11,8 @@ data class PostEntity(
     val location: String,
     val ratingText: String,
     val author: String,
+    val authorUid: String?,
+    val authorPhotoUrl: String?,
 
     val localImageUri: String?,
 

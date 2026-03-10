@@ -1,42 +1,212 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@color/mdt_bg"
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Edit Post"
-        android:textStyle="bold"
-        android:textSize="22sp" />
-
-    <EditText
-        android:id="@+id/etEditTitle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Title"
-        android:layout_marginTop="16dp"/>
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <EditText
-        android:id="@+id/etEditLocation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Location"
-        android:layout_marginTop="12dp"/>
+        <!-- Header with back button -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp">
 
-    <EditText
-        android:id="@+id/etEditRating"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Rating (e.g. ⭐ 4.8 (234))"
-        android:layout_marginTop="12dp"/>
+            <com.google.android.material.card.MaterialCardView
+                style="@style/MdtCard"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                app:cardBackgroundColor="@color/mdt_surface">
 
-    <Button
-        android:id="@+id/btnSaveEdit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Save"
-        android:layout_marginTop="18dp"/>
-</LinearLayout>
+                <ImageButton
+                    android:id="@+id/btnBackEdit"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_back"
+                    app:tint="@color/mdt_text_primary"
+                    android:contentDescription="Back"/>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Edit Post"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="@color/mdt_text_primary" />
+
+        </FrameLayout>
+
+        <!-- Form Card -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/MdtCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/mdt_surface"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- image preview and change button -->
+                <ImageView
+                    android:id="@+id/imgEditSelected"
+                    android:layout_width="match_parent"
+                    android:layout_height="160dp"
+                    android:scaleType="centerCrop"
+                    android:src="@android:drawable/ic_menu_gallery"
+                    android:contentDescription="@null"
+                    android:layout_marginBottom="12dp" />
+
+                <Button
+                    android:id="@+id/btnSelectPhotoEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Edit Photo"
+                    android:layout_marginBottom="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Post Details"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:textColor="@color/mdt_text_primary"
+                    android:layout_marginBottom="16dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Post Title"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_marginBottom="12dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEditTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapWords" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="About My Trip"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_marginBottom="12dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEditAboutTrip"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top|start"
+                        android:inputType="textMultiLine|textCapSentences" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Destination Name"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_marginBottom="12dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEditLocation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapWords" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rate Your Trip"
+                    android:textSize="16sp"
+                    android:textColor="@color/mdt_text_secondary"
+                    android:layout_marginBottom="12dp"/>
+
+                <LinearLayout
+                    android:id="@+id/ratingRowEdit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/starEditRating1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/starEditRating2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/starEditRating3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/starEditRating4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/starEditRating5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="☆"
+                        android:textColor="@color/mdt_text_primary"
+                        android:textSize="48sp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnSaveEdit"
+                    style="@style/MdtPrimaryButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Save Changes"
+                    android:layout_marginTop="8dp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>
