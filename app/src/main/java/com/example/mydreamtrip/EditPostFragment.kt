@@ -20,6 +20,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
 
@@ -254,6 +255,15 @@ class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
                             baseUpdate["wikiExtract"] = info.wikiExtract
                             baseUpdate["wikiUrl"] = info.wikiUrl ?: ""
                             baseUpdate["wikiImageUrl"] = info.wikiImageUrl ?: ""
+                        }
+                        .onFailure { e ->
+                            if (e is HttpException && e.code() == 404) {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Could Not Find A Match On Wikipedia",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
                     saveWithImageIfNeeded(baseUpdate)
                 }

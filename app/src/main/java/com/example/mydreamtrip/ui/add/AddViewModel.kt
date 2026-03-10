@@ -7,6 +7,7 @@ import com.example.mydreamtrip.data.remote.wiki.WikiRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 sealed class DestinationInfoState {
     data object Idle : DestinationInfoState()
@@ -36,7 +37,12 @@ class AddViewModel : ViewModel() {
                 val info = repo.fetchDestinationInfo(q)
                 _state.value = DestinationInfoState.Success(info)
             } catch (e: Exception) {
-                _state.value = DestinationInfoState.Error(e.message ?: "Failed to fetch destination info")
+                val msg = if (e is HttpException && e.code() == 404) {
+                    "Could Not Find A Match On Wikipedia"
+                } else {
+                    e.message ?: "Failed to fetch destination info"
+                }
+                _state.value = DestinationInfoState.Error(msg)
             }
         }
     }
