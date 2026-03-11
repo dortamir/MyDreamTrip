@@ -14,10 +14,13 @@ import com.google.firebase.auth.FirebaseAuth
 import android.content.Intent
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.imageview.ShapeableImageView
+import com.google.android.material.textfield.TextInputLayout
 import com.squareup.picasso.Picasso
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import android.text.method.HideReturnsTransformationMethod
+import android.text.method.PasswordTransformationMethod
 
 class SignupFragment : Fragment(R.layout.fragment_signup) {
 
@@ -48,8 +51,40 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
         val etFullName = view.findViewById<EditText>(R.id.etFullName)
         val etConfirmPassword = view.findViewById<EditText>(R.id.etConfirmPassword)
+        val tilPassword = view.findViewById<TextInputLayout>(R.id.tilPassword)
+        val tilConfirmPassword = view.findViewById<TextInputLayout>(R.id.tilConfirmPassword)
         val tvError = view.findViewById<TextView>(R.id.tvError)
         val btnPickImage = view.findViewById<FloatingActionButton>(R.id.btnPickImage)
+
+        var passwordVisible = false
+        etPassword.transformationMethod = PasswordTransformationMethod.getInstance()
+        tilPassword.setEndIconDrawable(R.drawable.ic_visibility_off)
+        tilPassword.setEndIconOnClickListener {
+            passwordVisible = !passwordVisible
+            if (passwordVisible) {
+                etPassword.transformationMethod = HideReturnsTransformationMethod.getInstance()
+                tilPassword.setEndIconDrawable(R.drawable.ic_visibility)
+            } else {
+                etPassword.transformationMethod = PasswordTransformationMethod.getInstance()
+                tilPassword.setEndIconDrawable(R.drawable.ic_visibility_off)
+            }
+            etPassword.setSelection(etPassword.text?.length ?: 0)
+        }
+
+        var confirmPasswordVisible = false
+        etConfirmPassword.transformationMethod = PasswordTransformationMethod.getInstance()
+        tilConfirmPassword.setEndIconDrawable(R.drawable.ic_visibility_off)
+        tilConfirmPassword.setEndIconOnClickListener {
+            confirmPasswordVisible = !confirmPasswordVisible
+            if (confirmPasswordVisible) {
+                etConfirmPassword.transformationMethod = HideReturnsTransformationMethod.getInstance()
+                tilConfirmPassword.setEndIconDrawable(R.drawable.ic_visibility)
+            } else {
+                etConfirmPassword.transformationMethod = PasswordTransformationMethod.getInstance()
+                tilConfirmPassword.setEndIconDrawable(R.drawable.ic_visibility_off)
+            }
+            etConfirmPassword.setSelection(etConfirmPassword.text?.length ?: 0)
+        }
 
         btnPickImage.setOnClickListener {
             pickImage.launch(arrayOf("image/*"))
