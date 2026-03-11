@@ -66,6 +66,27 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 return
             }
 
+            val cachedFast = requireContext()
+                .getSharedPreferences("profile_cache", Context.MODE_PRIVATE)
+                .getString("photo_ref_${current.uid}", "")
+                ?.takeIf { it.isNotBlank() }
+            val fastFallback = current.photoUrl?.toString()?.takeIf { it.isNotBlank() }
+            val fastUrl = cachedFast ?: fastFallback
+
+            if (fastUrl != null) {
+                Picasso.get()
+                    .load(fastUrl)
+                    .placeholder(R.drawable.ic_profile)
+                    .error(R.drawable.ic_profile)
+                    .fit()
+                    .centerCrop()
+                    .into(imgThumb)
+                applySoftProfileImageEffect(imgThumb)
+            } else {
+                clearProfileImageEffect(imgThumb)
+                imgThumb.setImageResource(R.drawable.ic_profile)
+            }
+
             current.reload().addOnCompleteListener {
                 val u = auth.currentUser
                 txtEmail.text = u?.email ?: ""
@@ -86,7 +107,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                         val urlToLoad = photoFromDoc ?: localFromDoc ?: cached ?: fallback
 
                         if (urlToLoad != null) {
-                            Picasso.get().load(urlToLoad).fit().centerCrop().into(imgThumb)
+                            Picasso.get().load(urlToLoad)
+                                .placeholder(R.drawable.ic_profile)
+                                .error(R.drawable.ic_profile)
+                                .fit().centerCrop().into(imgThumb)
                             applySoftProfileImageEffect(imgThumb)
                         } else {
                             clearProfileImageEffect(imgThumb)
@@ -95,7 +119,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                     }
                     .addOnFailureListener {
                         if (u?.photoUrl != null) {
-                            Picasso.get().load(u.photoUrl).fit().centerCrop().into(imgThumb)
+                            Picasso.get().load(u.photoUrl)
+                                .placeholder(R.drawable.ic_profile)
+                                .error(R.drawable.ic_profile)
+                                .fit().centerCrop().into(imgThumb)
                             applySoftProfileImageEffect(imgThumb)
                         } else {
                             clearProfileImageEffect(imgThumb)
