@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.content.Context
+import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -48,8 +49,11 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
         if (user == null) {
-            // shouldn't happen - return to login
-            findNavController().navigate(R.id.loginFragment)
+            // shouldn't happen - return to auth activity
+            val intent = Intent(requireContext(), AuthActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            requireActivity().finish()
             return
         }
         val previousAuthor = user.email?.substringBefore("@") ?: ""
