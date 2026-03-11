@@ -223,7 +223,11 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
             val text = etComment.text.toString().trim()
             if (text.isBlank()) return@setOnClickListener
 
-            val email = FirebaseAuth.getInstance().currentUser?.email ?: "Guest"
+            val email = FirebaseAuth.getInstance().currentUser?.email
+            if (email.isNullOrBlank()) {
+                Toast.makeText(requireContext(), "Please login to comment", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             val author = email.substringBefore("@")
 
             postRef.collection("comments").add(

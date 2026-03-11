@@ -67,7 +67,7 @@ class PostsRepository(context: Context) {
             title = getString("title") ?: "",
             location = getString("location") ?: "",
             ratingText = getString("ratingText") ?: "⭐ 0.0 (0)",
-            author = getString("author") ?: "Guest",
+            author = getString("author") ?: "",
             authorUid = getString("authorUid")?.takeIf { it.isNotBlank() },
             authorPhotoUrl = getString("authorPhotoUrl")?.takeIf { it.isNotBlank() },
             localImageUri = getString("localImageUri")?.takeIf { it.isNotBlank() },

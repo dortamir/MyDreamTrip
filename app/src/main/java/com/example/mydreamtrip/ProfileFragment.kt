@@ -60,7 +60,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             val auth = FirebaseAuth.getInstance()
             val current = auth.currentUser
             if (current == null) {
-                txtEmail.text = "Guest"
+                txtEmail.text = ""
                 txtName.text = ""
                 imgThumb.setImageResource(R.drawable.ic_profile)
                 return
@@ -68,7 +68,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
             current.reload().addOnCompleteListener {
                 val u = auth.currentUser
-                txtEmail.text = u?.email ?: "Guest"
+                txtEmail.text = u?.email ?: ""
                 txtName.text = u?.displayName ?: ""
 
                 FirebaseFirestore.getInstance()
