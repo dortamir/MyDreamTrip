@@ -14,6 +14,7 @@ import com.example.mydreamtrip.model.Comment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.squareup.picasso.Picasso
 
@@ -21,6 +22,8 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
 
     private lateinit var commentAdapter: CommentAdapter
     private val db by lazy { FirebaseFirestore.getInstance() }
+    private var postListenerRegistration: ListenerRegistration? = null
+    private var commentsListenerRegistration: ListenerRegistration? = null
 
     private fun normalizeRating(raw: String): String {
         val stars = raw.count { it == '⭐' }
@@ -77,7 +80,7 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
         val wikiExtract = view.findViewById<TextView>(R.id.txtWikiExtract)
         val btnOpenWiki = view.findViewById<Button>(R.id.btnOpenWiki)
 
-        postRef.addSnapshotListener { snapshot, error ->
+        postListenerRegistration = postRef.addSnapshotListener { snapshot, error ->
             if (error != null || snapshot == null || !snapshot.exists()) return@addSnapshotListener
 
             val updatedTitle = snapshot.getString("title") ?: args.title
@@ -179,7 +182,7 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
 
         val tvNoComments = view.findViewById<TextView>(R.id.tvNoComments)
 
-        postRef.collection("comments")
+        commentsListenerRegistration = postRef.collection("comments")
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) return@addSnapshotListener
@@ -223,7 +226,11 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
             val text = etComment.text.toString().trim()
             if (text.isBlank()) return@setOnClickListener
 
-            val email = FirebaseAuth.getInstance().currentUser?.email ?: "Guest"
+            val email = FirebaseAuth.getInstance().currentUser?.email
+            if (email.isNullOrBlank()) {
+                Toast.makeText(requireContext(), "Please login to comment", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             val author = email.substringBefore("@")
 
             postRef.collection("comments").add(
@@ -234,6 +241,16 @@ class PostDetailsFragment : Fragment(R.layout.fragment_post_details) {
                 )
             ).addOnSuccessListener { etComment.setText("") }
         }
+    }
+
+    override fun onDestroyView() {
+        postListenerRegistration?.remove()
+        postListenerRegistration = null
+
+        commentsListenerRegistration?.remove()
+        commentsListenerRegistration = null
+
+        super.onDestroyView()
     }
 }
 

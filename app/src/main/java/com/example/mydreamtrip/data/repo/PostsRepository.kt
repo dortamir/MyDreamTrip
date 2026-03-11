@@ -10,6 +10,7 @@ import com.example.mydreamtrip.data.local.PostEntity
 import com.example.mydreamtrip.data.local.PostsDao
 import com.example.mydreamtrip.model.Destination
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,10 +23,7 @@ class PostsRepository(context: Context) {
     private val dao: PostsDao = AppDatabase.getInstance(context).postsDao()
     private val db = FirebaseFirestore.getInstance()
     private val ioScope = CoroutineScope(Dispatchers.IO)
-
-    fun observeExplore(): Flow<List<Destination>> {
-        return dao.observeAll().map { list -> list.map { it.toDestination() } }
-    }
+    private var syncExplorePostsRegistration: ListenerRegistration? = null
 
     fun observeMyPosts(author: String): Flow<List<Destination>> {
         return dao.observeByAuthor(author).map { list -> list.map { it.toDestination() } }
@@ -43,20 +41,10 @@ class PostsRepository(context: Context) {
         }
     }
 
-    fun myPostsPaging(author: String): Flow<PagingData<Destination>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = 10,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { dao.pagingByAuthor(author) }
-        ).flow.map { pagingData ->
-            pagingData.map { entity -> entity.toDestination() }
-        }
-    }
-
     fun startSyncExplorePosts() {
-        db.collection("posts")
+        if (syncExplorePostsRegistration != null) return
+
+        syncExplorePostsRegistration = db.collection("posts")
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) return@addSnapshotListener
@@ -74,6 +62,11 @@ class PostsRepository(context: Context) {
             }
     }
 
+    fun stopSyncExplorePosts() {
+        syncExplorePostsRegistration?.remove()
+        syncExplorePostsRegistration = null
+    }
+
     private fun com.google.firebase.firestore.DocumentSnapshot.toPostEntity(): PostEntity {
         val createdAtMillis =
             getTimestamp("createdAt")?.toDate()?.time ?: 0L
@@ -83,7 +76,7 @@ class PostsRepository(context: Context) {
             title = getString("title") ?: "",
             location = getString("location") ?: "",
             ratingText = getString("ratingText") ?: "⭐ 0.0 (0)",
-            author = getString("author") ?: "Guest",
+            author = getString("author") ?: "",
             authorUid = getString("authorUid")?.takeIf { it.isNotBlank() },
             authorPhotoUrl = getString("authorPhotoUrl")?.takeIf { it.isNotBlank() },
             localImageUri = getString("localImageUri")?.takeIf { it.isNotBlank() },

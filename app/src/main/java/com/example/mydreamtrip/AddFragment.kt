@@ -244,7 +244,19 @@ class AddFragment : Fragment(R.layout.fragment_add) {
             progress.visibility = View.GONE
             tvStatus.text = "Creating post..."
 
-            val email = FirebaseAuth.getInstance().currentUser?.email ?: "Guest"
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            if (currentUser == null) {
+                setFormEnabled(true)
+                tvStatus.text = "Please login to create posts"
+                return@setOnClickListener
+            }
+
+            val email = currentUser.email
+            if (email.isNullOrBlank()) {
+                setFormEnabled(true)
+                tvStatus.text = "Unable to resolve your account email"
+                return@setOnClickListener
+            }
             val author = email.substringBefore("@")
 
             viewLifecycleOwner.lifecycleScope.launch {
@@ -263,7 +275,6 @@ class AddFragment : Fragment(R.layout.fragment_add) {
 
                 tvStatus.text = "Creating post..."
 
-                val currentUser = FirebaseAuth.getInstance().currentUser
                 val authorUid = currentUser?.uid ?: ""
                 val cachedPhotoRef = if (authorUid.isNotBlank()) {
                     requireContext()

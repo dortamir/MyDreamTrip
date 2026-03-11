@@ -51,9 +51,33 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
         rv.adapter = pagingAdapter
 
         val txtCount = view.findViewById<TextView>(R.id.txtCount)
+        val progress = view.findViewById<View>(R.id.progressExploreLoading)
+        val txtError = view.findViewById<TextView>(R.id.txtExploreError)
         pagingAdapter.addLoadStateListener { state ->
-            val loading = state.refresh is LoadState.Loading
-            txtCount.text = if (loading) "Loading..." else "${pagingAdapter.itemCount} posts"
+            val isInitialLoading = state.refresh is LoadState.Loading && pagingAdapter.itemCount == 0
+            val refreshError = state.refresh as? LoadState.Error
+
+            when {
+                isInitialLoading -> {
+                    progress.visibility = View.VISIBLE
+                    txtError.visibility = View.GONE
+                    rv.visibility = View.INVISIBLE
+                    txtCount.text = "Loading..."
+                }
+                refreshError != null && pagingAdapter.itemCount == 0 -> {
+                    progress.visibility = View.GONE
+                    txtError.visibility = View.VISIBLE
+                    txtError.text = "Unable to load posts"
+                    rv.visibility = View.INVISIBLE
+                    txtCount.text = "0 posts"
+                }
+                else -> {
+                    progress.visibility = View.GONE
+                    txtError.visibility = View.GONE
+                    rv.visibility = View.VISIBLE
+                    txtCount.text = "${pagingAdapter.itemCount} posts"
+                }
+            }
         }
 
         repo.startSyncExplorePosts()
@@ -63,5 +87,12 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
                 pagingAdapter.submitData(pagingData)
             }
         }
+    }
+
+    override fun onDestroyView() {
+        if (::repo.isInitialized) {
+            repo.stopSyncExplorePosts()
+        }
+        super.onDestroyView()
     }
 }

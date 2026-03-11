@@ -13,9 +13,6 @@ interface PostsDao {
     @Query("SELECT * FROM posts ORDER BY createdAt DESC")
     fun pagingAll(): PagingSource<Int, PostEntity>
 
-    @Query("SELECT * FROM posts WHERE author = :author ORDER BY createdAt DESC")
-    fun pagingByAuthor(author: String): PagingSource<Int, PostEntity>
-
     @Query("SELECT * FROM posts ORDER BY createdAt DESC")
     fun observeAll(): Flow<List<PostEntity>>
 
@@ -24,9 +21,6 @@ interface PostsDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(items: List<PostEntity>)
-
-    @Query("DELETE FROM posts WHERE id = :id")
-    suspend fun deleteById(id: String)
 
     @Query("DELETE FROM posts")
     suspend fun clearAll()
