@@ -70,4 +70,26 @@
         android:paddingBottom="16dp"
         android:paddingTop="4dp" />
 
+    <ProgressBar
+        android:id="@+id/progressExploreLoading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/rvDestinations"
+        app:layout_constraintBottom_toBottomOf="@id/rvDestinations"
+        app:layout_constraintStart_toStartOf="@id/rvDestinations"
+        app:layout_constraintEnd_toEndOf="@id/rvDestinations" />
+
+    <TextView
+        android:id="@+id/txtExploreError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Unable to load posts"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/rvDestinations"
+        app:layout_constraintBottom_toBottomOf="@id/rvDestinations"
+        app:layout_constraintStart_toStartOf="@id/rvDestinations"
+        app:layout_constraintEnd_toEndOf="@id/rvDestinations" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
