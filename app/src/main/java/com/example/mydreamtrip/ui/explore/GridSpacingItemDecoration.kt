@@ -22,7 +22,7 @@ class GridSpacingItemDecoration(
 
         outRect.left = spacingPx - column * spacingPx / spanCount
         outRect.right = (column + 1) * spacingPx / spanCount
-        outRect.top = spacingPx
-        outRect.bottom = spacingPx
+        outRect.top = spacingPx / 2
+        outRect.bottom = spacingPx / 2
     }
 }

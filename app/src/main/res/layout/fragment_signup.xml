@@ -185,7 +185,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:startIconDrawable="@drawable/ic_lock"
-                app:endIconMode="password_toggle">
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_visibility_off">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPassword"
@@ -213,7 +214,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:startIconDrawable="@drawable/ic_lock"
-                app:endIconMode="password_toggle">
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_visibility_off">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etConfirmPassword"

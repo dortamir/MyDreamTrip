@@ -7,8 +7,11 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import android.content.Intent
+import android.text.method.HideReturnsTransformationMethod
+import android.text.method.PasswordTransformationMethod
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
 
@@ -17,7 +20,23 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
         val etEmail = view.findViewById<EditText>(R.id.etEmail)
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
+        val tilPassword = view.findViewById<TextInputLayout>(R.id.tilPassword)
         val tvError = view.findViewById<TextView>(R.id.tvError)
+
+        var passwordVisible = false
+        etPassword.transformationMethod = PasswordTransformationMethod.getInstance()
+        tilPassword.setEndIconDrawable(R.drawable.ic_visibility_off)
+        tilPassword.setEndIconOnClickListener {
+            passwordVisible = !passwordVisible
+            if (passwordVisible) {
+                etPassword.transformationMethod = HideReturnsTransformationMethod.getInstance()
+                tilPassword.setEndIconDrawable(R.drawable.ic_visibility)
+            } else {
+                etPassword.transformationMethod = PasswordTransformationMethod.getInstance()
+                tilPassword.setEndIconDrawable(R.drawable.ic_visibility_off)
+            }
+            etPassword.setSelection(etPassword.text?.length ?: 0)
+        }
 
         view.findViewById<Button>(R.id.btnLogin).setOnClickListener {
             tvError.text = ""

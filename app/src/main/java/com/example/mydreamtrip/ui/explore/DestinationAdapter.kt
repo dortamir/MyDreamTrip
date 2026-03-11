@@ -40,6 +40,28 @@ class DestinationAdapter(
         holder.rating.text = normalizeRating(item.ratingText)
         holder.author.text = item.author
 
+        if (item.authorUid.isNotBlank()) {
+            holder.itemView.setTag(R.id.txtAuthor, item.authorUid)
+            val cachedName = authorNameCache[item.authorUid]
+            if (!cachedName.isNullOrBlank()) {
+                holder.author.text = cachedName
+            } else {
+                FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(item.authorUid)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        val username = snapshot.getString("displayName")?.takeIf { it.isNotBlank() }
+                            ?: return@addOnSuccessListener
+                        authorNameCache[item.authorUid] = username
+                        val boundUid = holder.itemView.getTag(R.id.txtAuthor) as? String
+                        if (boundUid == item.authorUid && holder.bindingAdapterPosition != RecyclerView.NO_POSITION) {
+                            holder.author.text = username
+                        }
+                    }
+            }
+        }
+
         if (item.authorPhotoUrl.isNotBlank()) {
             Picasso.get()
                 .load(item.authorPhotoUrl)
@@ -65,6 +87,16 @@ class DestinationAdapter(
                     .document(item.authorUid)
                     .get()
                     .addOnSuccessListener { snapshot ->
+                        snapshot.getString("displayName")
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { username ->
+                                authorNameCache[item.authorUid] = username
+                                val boundUid = holder.itemView.getTag(R.id.txtAuthor) as? String
+                                if (boundUid == item.authorUid && holder.bindingAdapterPosition != RecyclerView.NO_POSITION) {
+                                    holder.author.text = username
+                                }
+                            }
+
                         val url = snapshot.getString("photoUrl")?.takeIf { it.isNotBlank() }
                             ?: snapshot.getString("photoLocalUri")?.takeIf { it.isNotBlank() }
                             ?: return@addOnSuccessListener
@@ -119,5 +151,6 @@ class DestinationAdapter(
 
     companion object {
         private val photoCache = mutableMapOf<String, String>()
+        private val authorNameCache = mutableMapOf<String, String>()
     }
 }

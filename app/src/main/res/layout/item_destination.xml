@@ -10,7 +10,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
         <com.google.android.material.imageview.ShapeableImageView
@@ -24,7 +24,8 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:orientation="vertical"
             android:padding="@dimen/space_12">
 
@@ -82,6 +83,11 @@
 
             <View
                 android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+            <View
+                android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/mdt_stroke"
                 android:layout_marginTop="10dp"
@@ -91,6 +97,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:baselineAligned="false"
                 android:gravity="center_vertical">
 
                 <com.google.android.material.imageview.ShapeableImageView
@@ -103,12 +110,15 @@
 
                 <TextView
                     android:id="@+id/txtAuthor"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="Shani Attias"
                     android:textSize="13sp"
                     android:textColor="@color/mdt_text_primary"
-                    android:layout_marginStart="10dp"/>
+                    android:layout_marginStart="10dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"/>
             </LinearLayout>
 
         </LinearLayout>
