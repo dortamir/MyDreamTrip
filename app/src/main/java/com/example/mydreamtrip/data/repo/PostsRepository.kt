@@ -10,6 +10,7 @@ import com.example.mydreamtrip.data.local.PostEntity
 import com.example.mydreamtrip.data.local.PostsDao
 import com.example.mydreamtrip.model.Destination
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,7 @@ class PostsRepository(context: Context) {
     private val dao: PostsDao = AppDatabase.getInstance(context).postsDao()
     private val db = FirebaseFirestore.getInstance()
     private val ioScope = CoroutineScope(Dispatchers.IO)
+    private var syncExplorePostsRegistration: ListenerRegistration? = null
 
     fun observeMyPosts(author: String): Flow<List<Destination>> {
         return dao.observeByAuthor(author).map { list -> list.map { it.toDestination() } }
@@ -40,7 +42,9 @@ class PostsRepository(context: Context) {
     }
 
     fun startSyncExplorePosts() {
-        db.collection("posts")
+        if (syncExplorePostsRegistration != null) return
+
+        syncExplorePostsRegistration = db.collection("posts")
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) return@addSnapshotListener
@@ -56,6 +60,11 @@ class PostsRepository(context: Context) {
                     }
                 }
             }
+    }
+
+    fun stopSyncExplorePosts() {
+        syncExplorePostsRegistration?.remove()
+        syncExplorePostsRegistration = null
     }
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toPostEntity(): PostEntity {

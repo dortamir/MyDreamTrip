@@ -64,4 +64,11 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
             }
         }
     }
+
+    override fun onDestroyView() {
+        if (::repo.isInitialized) {
+            repo.stopSyncExplorePosts()
+        }
+        super.onDestroyView()
+    }
 }

@@ -171,4 +171,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             startActivity(intent)
         }
     }
+
+    override fun onDestroyView() {
+        if (::repo.isInitialized) {
+            repo.stopSyncExplorePosts()
+        }
+        super.onDestroyView()
+    }
 }
