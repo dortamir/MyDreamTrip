@@ -66,6 +66,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 return
             }
 
+            txtEmail.text = current.email ?: ""
+            txtName.text = current.displayName ?: ""
+
             val cachedFast = requireContext()
                 .getSharedPreferences("profile_cache", Context.MODE_PRIVATE)
                 .getString("photo_ref_${current.uid}", "")
