@@ -23,10 +23,6 @@ class PostsRepository(context: Context) {
     private val db = FirebaseFirestore.getInstance()
     private val ioScope = CoroutineScope(Dispatchers.IO)
 
-    fun observeExplore(): Flow<List<Destination>> {
-        return dao.observeAll().map { list -> list.map { it.toDestination() } }
-    }
-
     fun observeMyPosts(author: String): Flow<List<Destination>> {
         return dao.observeByAuthor(author).map { list -> list.map { it.toDestination() } }
     }
@@ -38,18 +34,6 @@ class PostsRepository(context: Context) {
                 enablePlaceholders = false
             ),
             pagingSourceFactory = { dao.pagingAll() }
-        ).flow.map { pagingData ->
-            pagingData.map { entity -> entity.toDestination() }
-        }
-    }
-
-    fun myPostsPaging(author: String): Flow<PagingData<Destination>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = 10,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { dao.pagingByAuthor(author) }
         ).flow.map { pagingData ->
             pagingData.map { entity -> entity.toDestination() }
         }
