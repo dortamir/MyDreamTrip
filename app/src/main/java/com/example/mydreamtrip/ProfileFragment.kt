@@ -188,8 +188,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repo.observeMyPosts(author).collectLatest { items ->
-                tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
-                tvEmpty.text = "No posts yet"
+                val hasPosts = items.isNotEmpty()
+                tvEmpty.visibility = if (hasPosts) View.GONE else View.VISIBLE
+                tvEmpty.text = if (hasPosts) "" else "No posts yet"
+                rvMyPosts.visibility = if (hasPosts) View.VISIBLE else View.GONE
                 adapter.submitList(items)
             }
         }
