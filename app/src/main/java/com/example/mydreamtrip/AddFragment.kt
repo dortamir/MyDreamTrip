@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -62,6 +63,13 @@ class AddFragment : Fragment(R.layout.fragment_add) {
         val btnCreate = view.findViewById<Button>(R.id.btnCreatePost)
         val btnSelectPhoto = view.findViewById<Button>(R.id.btnSelectPhoto)
         val imgSelected = view.findViewById<ImageView>(R.id.imgSelected)
+        val normalStatusColor = tvStatus.currentTextColor
+        val errorStatusColor = ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark)
+
+        fun setStatus(message: String, isError: Boolean = false) {
+            tvStatus.text = message
+            tvStatus.setTextColor(if (isError) errorStatusColor else normalStatusColor)
+        }
 
         val ratingStars = listOf(
             view.findViewById<TextView>(R.id.starRating1),
@@ -184,7 +192,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
         btnFetch.setOnClickListener {
             val loc = etLocation.text.toString().trim()
             if (loc.isBlank()) {
-                tvStatus.text = "Please enter a location first"
+                setStatus("Please enter a location first", isError = true)
                 return@setOnClickListener
             }
             vm.fetchDestinationInfo(loc)
@@ -198,14 +206,14 @@ class AddFragment : Fragment(R.layout.fragment_add) {
                         progress.visibility = View.GONE
                     }
                     is DestinationInfoState.Loading -> {
-                        tvStatus.text = "Fetching destination info..."
+                        setStatus("Fetching destination info...")
                         progress.visibility = View.VISIBLE
                         setFormEnabled(false)
                     }
                     is DestinationInfoState.Success -> {
                         progress.visibility = View.GONE
                         setFormEnabled(true)
-                        tvStatus.text = ""
+                        setStatus("")
 
                         val info = state.info
                         wikiTitle = info.wikiTitle
@@ -222,7 +230,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
                     is DestinationInfoState.Error -> {
                         progress.visibility = View.GONE
                         setFormEnabled(true)
-                        tvStatus.text = state.message
+                        setStatus(state.message, isError = true)
                     }
                 }
             }
@@ -234,7 +242,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
             val location = etLocation.text.toString().trim()
 
             if (title.isBlank() || location.isBlank()) {
-                tvStatus.text = "Please fill in all fields"
+                setStatus("Please fill in all fields", isError = true)
                 return@setOnClickListener
             }
 
@@ -242,19 +250,19 @@ class AddFragment : Fragment(R.layout.fragment_add) {
 
             setFormEnabled(false)
             progress.visibility = View.GONE
-            tvStatus.text = "Creating post..."
+            setStatus("Creating post...")
 
             val currentUser = FirebaseAuth.getInstance().currentUser
             if (currentUser == null) {
                 setFormEnabled(true)
-                tvStatus.text = "Please login to create posts"
+                setStatus("Please login to create posts", isError = true)
                 return@setOnClickListener
             }
 
             val email = currentUser.email
             if (email.isNullOrBlank()) {
                 setFormEnabled(true)
-                tvStatus.text = "Unable to resolve your account email"
+                setStatus("Unable to resolve your account email", isError = true)
                 return@setOnClickListener
             }
             val author = email.substringBefore("@")
@@ -262,7 +270,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
             viewLifecycleOwner.lifecycleScope.launch {
 
                 if (wikiTitle.isBlank() && wikiExtract.isBlank() && wikiUrl.isBlank() && wikiImageUrl.isBlank()) {
-                    tvStatus.text = "Fetching Wikipedia..."
+                    setStatus("Fetching Wikipedia...")
                     try {
                         val info = wikiRepo.fetchDestinationInfo(location)
                         wikiTitle = info.wikiTitle
@@ -273,7 +281,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
                     }
                 }
 
-                tvStatus.text = "Creating post..."
+                setStatus("Creating post...")
 
                 val authorUid = currentUser?.uid ?: ""
                 val cachedPhotoRef = if (authorUid.isNotBlank()) {
@@ -309,7 +317,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
                 db.collection("posts")
                     .add(data)
                     .addOnSuccessListener {
-                        tvStatus.text = ""
+                        setStatus("")
                         Toast.makeText(requireContext(), "Post Created", Toast.LENGTH_SHORT).show()
                         clearForm()
                         setFormEnabled(true)
@@ -317,7 +325,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
                     }
                     .addOnFailureListener { e ->
                         setFormEnabled(true)
-                        tvStatus.text = e.message ?: "Failed to create post"
+                        setStatus(e.message ?: "Failed to create post", isError = true)
                     }
             }
         }
