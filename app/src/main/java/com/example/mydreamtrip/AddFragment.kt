@@ -248,13 +248,15 @@ class AddFragment : Fragment(R.layout.fragment_add) {
 
             val ratingText = "⭐".repeat(selectedRating.coerceIn(0, 5))
 
+            // Show loading state
             setFormEnabled(false)
-            progress.visibility = View.GONE
+            progress.visibility = View.VISIBLE
             setStatus("Creating post...")
 
             val currentUser = FirebaseAuth.getInstance().currentUser
             if (currentUser == null) {
                 setFormEnabled(true)
+                progress.visibility = View.GONE
                 setStatus("Please login to create posts", isError = true)
                 return@setOnClickListener
             }
@@ -262,6 +264,7 @@ class AddFragment : Fragment(R.layout.fragment_add) {
             val email = currentUser.email
             if (email.isNullOrBlank()) {
                 setFormEnabled(true)
+                progress.visibility = View.GONE
                 setStatus("Unable to resolve your account email", isError = true)
                 return@setOnClickListener
             }
@@ -317,14 +320,18 @@ class AddFragment : Fragment(R.layout.fragment_add) {
                 db.collection("posts")
                     .add(data)
                     .addOnSuccessListener {
+                        // Hide loading state on success
                         setStatus("")
+                        progress.visibility = View.GONE
+                        setFormEnabled(true)
                         Toast.makeText(requireContext(), "Post Created", Toast.LENGTH_SHORT).show()
                         clearForm()
-                        setFormEnabled(true)
                         goToExplore()
                     }
                     .addOnFailureListener { e ->
+                        // Hide loading state on error
                         setFormEnabled(true)
+                        progress.visibility = View.GONE
                         setStatus(e.message ?: "Failed to create post", isError = true)
                     }
             }

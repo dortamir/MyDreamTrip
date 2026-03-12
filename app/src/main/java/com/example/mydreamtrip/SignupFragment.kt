@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.content.Context
 import androidx.activity.result.contract.ActivityResultContracts
@@ -55,6 +56,8 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
         val tilConfirmPassword = view.findViewById<TextInputLayout>(R.id.tilConfirmPassword)
         val tvError = view.findViewById<TextView>(R.id.tvError)
         val btnPickImage = view.findViewById<FloatingActionButton>(R.id.btnPickImage)
+        val btnSignup = view.findViewById<Button>(R.id.btnSignup)
+        val progressSignup = view.findViewById<ProgressBar>(R.id.progressSignup)
 
         var passwordVisible = false
         etPassword.transformationMethod = PasswordTransformationMethod.getInstance()
@@ -90,7 +93,7 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
             pickImage.launch(arrayOf("image/*"))
         }
 
-        view.findViewById<Button>(R.id.btnSignup).setOnClickListener {
+        btnSignup.setOnClickListener {
             tvError.text = ""
 
             val fullName = etFullName.text.toString().trim()
@@ -113,12 +116,29 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
                 return@setOnClickListener
             }
 
+            // Show loading state
+            btnSignup.isEnabled = false
+            progressSignup.visibility = View.VISIBLE
+            etEmail.isEnabled = false
+            etPassword.isEnabled = false
+            etFullName.isEnabled = false
+            etConfirmPassword.isEnabled = false
+            btnPickImage.isEnabled = false
+
             FirebaseAuth.getInstance()
                 .createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener { authResult ->
                     val user = authResult.user
                     if (user == null) {
                         tvError.text = "Signup failed"
+                        // Reset loading state
+                        btnSignup.isEnabled = true
+                        progressSignup.visibility = View.GONE
+                        etEmail.isEnabled = true
+                        etPassword.isEnabled = true
+                        etFullName.isEnabled = true
+                        etConfirmPassword.isEnabled = true
+                        btnPickImage.isEnabled = true
                         return@addOnSuccessListener
                     }
 
@@ -163,6 +183,14 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
                                     }
                             }
                             .addOnFailureListener { e ->
+                                // Reset loading state on error
+                                btnSignup.isEnabled = true
+                                progressSignup.visibility = View.GONE
+                                etEmail.isEnabled = true
+                                etPassword.isEnabled = true
+                                etFullName.isEnabled = true
+                                etConfirmPassword.isEnabled = true
+                                btnPickImage.isEnabled = true
                                 tvError.text = e.message ?: "Failed to save profile"
                             }
                     }
@@ -187,11 +215,19 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
                     }
                 }
                 .addOnFailureListener { e ->
+                    // Reset loading state on error
+                    btnSignup.isEnabled = true
+                    progressSignup.visibility = View.GONE
+                    etEmail.isEnabled = true
+                    etPassword.isEnabled = true
+                    etFullName.isEnabled = true
+                    etConfirmPassword.isEnabled = true
+                    btnPickImage.isEnabled = true
                     tvError.text = e.message ?: "Signup failed"
                 }
         }
 
-            view.findViewById<TextView>(R.id.tvGoLogin).setOnClickListener {
+        view.findViewById<TextView>(R.id.tvGoLogin).setOnClickListener {
             findNavController().navigate(R.id.loginFragment)
         }
     }
