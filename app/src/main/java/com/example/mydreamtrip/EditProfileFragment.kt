@@ -4,12 +4,17 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.mydreamtrip.data.local.UserEntity
+import com.example.mydreamtrip.data.repo.UsersRepository
+import kotlinx.coroutines.launch
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textfield.TextInputEditText
@@ -64,6 +69,8 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         val btnPhoto = view.findViewById<FloatingActionButton>(R.id.btnChangePhoto)
         val img = view.findViewById<ShapeableImageView>(R.id.imgProfileEdit)
         val btnSave = view.findViewById<Button>(R.id.btnSaveProfile)
+        val progressEditProfile = view.findViewById<ProgressBar>(R.id.progressEditProfile)
+        val usersRepo = UsersRepository(requireContext())
 
         // prefill with current user data (like edit post)
         etName.setText(user.displayName ?: "")
@@ -89,8 +96,13 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
                 return@setOnClickListener
             }
 
+            // Show loading state
             btnSave.isEnabled = false
+            progressEditProfile.visibility = View.VISIBLE
             tvStatus.text = "Saving..."
+            etName.isEnabled = false
+            etEmail.isEnabled = false
+            btnPhoto.isEnabled = false
 
             // update display name/email/password sequentially
             val updates = mutableListOf<() -> com.google.android.gms.tasks.Task<Void>>()
@@ -126,6 +138,10 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
                                 .addOnSuccessListener { onDone() }
                                 .addOnFailureListener {
                                     btnSave.isEnabled = true
+                                    progressEditProfile.visibility = View.GONE
+                                    etName.isEnabled = true
+                                    etEmail.isEnabled = true
+                                    btnPhoto.isEnabled = true
                                     tvStatus.text = it.message ?: "Failed to update profile photo"
                                 }
                         }.addOnFailureListener {
@@ -183,6 +199,14 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
                     .document(reloadedUser.uid)
                     .set(profileData, SetOptions.merge())
                     .addOnSuccessListener {
+                        lifecycleScope.launch {
+                            usersRepo.saveUser(UserEntity(
+                                uid = reloadedUser.uid,
+                                name = displayNameNow,
+                                email = emailNow,
+                                photoUrl = photoRef
+                            ))
+                        }
                         firestore.collection("posts")
                             .whereEqualTo("authorUid", reloadedUser.uid)
                             .get()
@@ -221,6 +245,13 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
                     uploadPhotoAndContinue {
                         user.reload().addOnCompleteListener {
                             syncUserData {
+                                // Hide loading state on success
+                                btnSave.isEnabled = true
+                                progressEditProfile.visibility = View.GONE
+                                etName.isEnabled = true
+                                etEmail.isEnabled = true
+                                btnPhoto.isEnabled = true
+                                tvStatus.text = ""
                                 Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
                                 findNavController().previousBackStackEntry?.savedStateHandle?.set("profileUpdated", true)
                                 findNavController().popBackStack()
@@ -234,7 +265,12 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
                     if (t.isSuccessful) {
                         runNext()
                     } else {
+                        // Hide loading state on error
                         btnSave.isEnabled = true
+                        progressEditProfile.visibility = View.GONE
+                        etName.isEnabled = true
+                        etEmail.isEnabled = true
+                        btnPhoto.isEnabled = true
                         tvStatus.text = t.exception?.message ?: "Update failed"
                     }
                 }

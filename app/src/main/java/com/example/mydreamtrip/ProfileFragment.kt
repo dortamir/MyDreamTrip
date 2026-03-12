@@ -16,7 +16,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mydreamtrip.data.local.UserEntity
 import com.example.mydreamtrip.data.repo.PostsRepository
+import com.example.mydreamtrip.data.repo.UsersRepository
 import com.example.mydreamtrip.ui.explore.DestinationAdapter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -46,6 +48,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         super.onViewCreated(view, savedInstanceState)
 
         repo = PostsRepository(requireContext())
+        val usersRepo = UsersRepository(requireContext())
 
         val txtEmail = view.findViewById<TextView>(R.id.txtEmail)
         val txtName = view.findViewById<TextView>(R.id.txtName)
@@ -90,6 +93,19 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 imgThumb.setImageResource(R.drawable.ic_profile)
             }
 
+            if (fastUrl == null) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val cachedUser = usersRepo.getCachedUser(current.uid)
+                    if (cachedUser != null && cachedUser.photoUrl.isNotBlank()) {
+                        Picasso.get().load(cachedUser.photoUrl)
+                            .placeholder(R.drawable.ic_profile)
+                            .error(R.drawable.ic_profile)
+                            .fit().centerCrop().into(imgThumb)
+                        applySoftProfileImageEffect(imgThumb)
+                    }
+                }
+            }
+
             current.reload().addOnCompleteListener {
                 val u = auth.currentUser
                 txtEmail.text = u?.email ?: ""
@@ -118,6 +134,14 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                         } else {
                             clearProfileImageEffect(imgThumb)
                             imgThumb.setImageResource(R.drawable.ic_profile)
+                        }
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            usersRepo.saveUser(UserEntity(
+                                uid = current.uid,
+                                name = u?.displayName ?: "",
+                                email = u?.email ?: "",
+                                photoUrl = urlToLoad ?: ""
+                            ))
                         }
                     }
                     .addOnFailureListener {

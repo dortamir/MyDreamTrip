@@ -241,10 +241,22 @@
             style="@style/MdtPrimaryButton"
             android:layout_width="0dp"
             android:text="Create Account"
-            app:layout_constraintTop_toBottomOf="@id/formContainer"
+            app:layout_constraintTop_toBottomOf="@id/progressSignup"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_goneMarginTop="@dimen/space_20"
             android:layout_marginTop="@dimen/space_20"/>
+
+        <ProgressBar
+            android:id="@+id/progressSignup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="@dimen/space_8"
+            app:layout_constraintTop_toBottomOf="@id/formContainer"
+            app:layout_constraintBottom_toTopOf="@id/btnSignup"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <TextView
             android:id="@+id/tvGoLogin"

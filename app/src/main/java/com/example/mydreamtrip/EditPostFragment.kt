@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -66,6 +67,7 @@ class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
         val etAboutTrip = view.findViewById<TextInputEditText>(R.id.etEditAboutTrip)
         val etLocation = view.findViewById<TextInputEditText>(R.id.etEditLocation)
         val btnSave = view.findViewById<Button>(R.id.btnSaveEdit)
+        val progressEditPost = view.findViewById<ProgressBar>(R.id.progressEditPost)
         val postRef = db.collection("posts").document(postId)
 
         val ratingStars = listOf(
@@ -185,7 +187,13 @@ class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
 
             // Show loading state
             btnSave.isEnabled = false
+            progressEditPost.visibility = View.VISIBLE
             btnSave.text = "Saving..."
+            btnPhoto.isEnabled = false
+            etTitle.isEnabled = false
+            etAboutTrip.isEnabled = false
+            etLocation.isEnabled = false
+            ratingStars.forEach { it.isEnabled = false }
 
             val currentImageUri = selectedImageUri?.toString()
                 ?.takeIf { it.isNotBlank() }
@@ -204,12 +212,28 @@ class EditPostFragment : Fragment(R.layout.fragment_edit_post) {
                 // update() preserves all other fields (including wiki info)
                 postRef.update(updateMap)
                     .addOnSuccessListener {
+                        // Hide loading state on success
+                        btnSave.isEnabled = true
+                        progressEditPost.visibility = View.GONE
+                        btnSave.text = "Save Changes"
+                        btnPhoto.isEnabled = true
+                        etTitle.isEnabled = true
+                        etAboutTrip.isEnabled = true
+                        etLocation.isEnabled = true
+                        ratingStars.forEach { it.isEnabled = true }
                         Toast.makeText(requireContext(), "Post updated successfully!", Toast.LENGTH_SHORT).show()
                         findNavController().popBackStack()
                     }
                     .addOnFailureListener { e ->
+                        // Hide loading state on error
                         btnSave.isEnabled = true
+                        progressEditPost.visibility = View.GONE
                         btnSave.text = "Save Changes"
+                        btnPhoto.isEnabled = true
+                        etTitle.isEnabled = true
+                        etAboutTrip.isEnabled = true
+                        etLocation.isEnabled = true
+                        ratingStars.forEach { it.isEnabled = true }
                         val msg = when {
                             e.message?.contains("NOT_FOUND") == true -> "Post not found (maybe deleted)"
                             else -> "Failed to update post: ${e.message ?: "Unknown error"}"

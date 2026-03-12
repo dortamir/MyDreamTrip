@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -22,6 +23,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         val etPassword = view.findViewById<EditText>(R.id.etPassword)
         val tilPassword = view.findViewById<TextInputLayout>(R.id.tilPassword)
         val tvError = view.findViewById<TextView>(R.id.tvError)
+        val btnLogin = view.findViewById<Button>(R.id.btnLogin)
+        val progressLogin = view.findViewById<ProgressBar>(R.id.progressLogin)
 
         var passwordVisible = false
         etPassword.transformationMethod = PasswordTransformationMethod.getInstance()
@@ -38,7 +41,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             etPassword.setSelection(etPassword.text?.length ?: 0)
         }
 
-        view.findViewById<Button>(R.id.btnLogin).setOnClickListener {
+        btnLogin.setOnClickListener {
             tvError.text = ""
 
             val email = etEmail.text.toString().trim()
@@ -49,16 +52,26 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 return@setOnClickListener
             }
 
+            // Show loading state
+            btnLogin.isEnabled = false
+            progressLogin.visibility = View.VISIBLE
+            etEmail.isEnabled = false
+            etPassword.isEnabled = false
+
             FirebaseAuth.getInstance()
                 .signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
-
                     val intent = Intent(requireContext(), MainActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                     requireActivity().finish()
                 }
                 .addOnFailureListener { e ->
+                    // Hide loading state on error
+                    btnLogin.isEnabled = true
+                    progressLogin.visibility = View.GONE
+                    etEmail.isEnabled = true
+                    etPassword.isEnabled = true
                     tvError.text = e.message ?: "Login failed"
                 }
         }

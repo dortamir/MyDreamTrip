@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.content.Context
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,6 +22,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
+import androidx.lifecycle.lifecycleScope
+import com.example.mydreamtrip.data.local.UserEntity
+import com.example.mydreamtrip.data.repo.UsersRepository
+import kotlinx.coroutines.launch
 
 class SignupFragment : Fragment(R.layout.fragment_signup) {
 
@@ -55,6 +60,9 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
         val tilConfirmPassword = view.findViewById<TextInputLayout>(R.id.tilConfirmPassword)
         val tvError = view.findViewById<TextView>(R.id.tvError)
         val btnPickImage = view.findViewById<FloatingActionButton>(R.id.btnPickImage)
+        val btnSignup = view.findViewById<Button>(R.id.btnSignup)
+        val progressSignup = view.findViewById<ProgressBar>(R.id.progressSignup)
+        val usersRepo = UsersRepository(requireContext())
 
         var passwordVisible = false
         etPassword.transformationMethod = PasswordTransformationMethod.getInstance()
@@ -90,7 +98,7 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
             pickImage.launch(arrayOf("image/*"))
         }
 
-        view.findViewById<Button>(R.id.btnSignup).setOnClickListener {
+        btnSignup.setOnClickListener {
             tvError.text = ""
 
             val fullName = etFullName.text.toString().trim()
@@ -113,12 +121,29 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
                 return@setOnClickListener
             }
 
+            // Show loading state
+            btnSignup.isEnabled = false
+            progressSignup.visibility = View.VISIBLE
+            etEmail.isEnabled = false
+            etPassword.isEnabled = false
+            etFullName.isEnabled = false
+            etConfirmPassword.isEnabled = false
+            btnPickImage.isEnabled = false
+
             FirebaseAuth.getInstance()
                 .createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener { authResult ->
                     val user = authResult.user
                     if (user == null) {
                         tvError.text = "Signup failed"
+                        // Reset loading state
+                        btnSignup.isEnabled = true
+                        progressSignup.visibility = View.GONE
+                        etEmail.isEnabled = true
+                        etPassword.isEnabled = true
+                        etFullName.isEnabled = true
+                        etConfirmPassword.isEnabled = true
+                        btnPickImage.isEnabled = true
                         return@addOnSuccessListener
                     }
 
@@ -154,6 +179,14 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
                                     .document(user.uid)
                                     .set(userDoc, com.google.firebase.firestore.SetOptions.merge())
                                     .addOnCompleteListener {
+                                        viewLifecycleOwner.lifecycleScope.launch {
+                                            usersRepo.saveUser(UserEntity(
+                                                uid = user.uid,
+                                                name = fullName,
+                                                email = email,
+                                                photoUrl = photoRef
+                                            ))
+                                        }
                                         user.reload().addOnCompleteListener {
                                             val intent = Intent(requireContext(), MainActivity::class.java)
                                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -163,6 +196,14 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
                                     }
                             }
                             .addOnFailureListener { e ->
+                                // Reset loading state on error
+                                btnSignup.isEnabled = true
+                                progressSignup.visibility = View.GONE
+                                etEmail.isEnabled = true
+                                etPassword.isEnabled = true
+                                etFullName.isEnabled = true
+                                etConfirmPassword.isEnabled = true
+                                btnPickImage.isEnabled = true
                                 tvError.text = e.message ?: "Failed to save profile"
                             }
                     }
@@ -187,11 +228,19 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
                     }
                 }
                 .addOnFailureListener { e ->
+                    // Reset loading state on error
+                    btnSignup.isEnabled = true
+                    progressSignup.visibility = View.GONE
+                    etEmail.isEnabled = true
+                    etPassword.isEnabled = true
+                    etFullName.isEnabled = true
+                    etConfirmPassword.isEnabled = true
+                    btnPickImage.isEnabled = true
                     tvError.text = e.message ?: "Signup failed"
                 }
         }
 
-            view.findViewById<TextView>(R.id.tvGoLogin).setOnClickListener {
+        view.findViewById<TextView>(R.id.tvGoLogin).setOnClickListener {
             findNavController().navigate(R.id.loginFragment)
         }
     }
