@@ -20,6 +20,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
 
@@ -299,41 +300,68 @@ class AddFragment : Fragment(R.layout.fragment_add) {
                     ?.takeIf { it.isNotBlank() }
                     ?: cachedPhotoRef
 
-                val data = hashMapOf(
-                    "title" to title,
-                    "aboutTrip" to aboutTrip,
-                    "location" to location,
-                    "ratingText" to ratingText,
-                    "author" to author,
-                    "authorUid" to authorUid,
-                    "localImageUri" to (selectedImageUri?.toString() ?: ""),
-                    "authorPhotoUrl" to authorPhotoUrl,
-                    "createdAt" to FieldValue.serverTimestamp(),
+                fun createPostWithImageUrl(imageUrl: String) {
+                    val data = hashMapOf(
+                        "title" to title,
+                        "aboutTrip" to aboutTrip,
+                        "location" to location,
+                        "ratingText" to ratingText,
+                        "author" to author,
+                        "authorUid" to authorUid,
+                        "localImageUri" to imageUrl,
+                        "authorPhotoUrl" to authorPhotoUrl,
+                        "createdAt" to FieldValue.serverTimestamp(),
 
-                    // Wikipedia fields
-                    "wikiTitle" to wikiTitle,
-                    "wikiExtract" to wikiExtract,
-                    "wikiUrl" to wikiUrl,
-                    "wikiImageUrl" to wikiImageUrl
-                )
+                        // Wikipedia fields
+                        "wikiTitle" to wikiTitle,
+                        "wikiExtract" to wikiExtract,
+                        "wikiUrl" to wikiUrl,
+                        "wikiImageUrl" to wikiImageUrl
+                    )
 
-                db.collection("posts")
-                    .add(data)
-                    .addOnSuccessListener {
-                        // Hide loading state on success
-                        setStatus("")
-                        progress.visibility = View.GONE
-                        setFormEnabled(true)
-                        Toast.makeText(requireContext(), "Post Created", Toast.LENGTH_SHORT).show()
-                        clearForm()
-                        goToExplore()
-                    }
-                    .addOnFailureListener { e ->
-                        // Hide loading state on error
-                        setFormEnabled(true)
-                        progress.visibility = View.GONE
-                        setStatus(e.message ?: "Failed to create post", isError = true)
-                    }
+                    db.collection("posts")
+                        .add(data)
+                        .addOnSuccessListener {
+                            // Hide loading state on success
+                            setStatus("")
+                            progress.visibility = View.GONE
+                            setFormEnabled(true)
+                            Toast.makeText(requireContext(), "Post Created", Toast.LENGTH_SHORT).show()
+                            clearForm()
+                            goToExplore()
+                        }
+                        .addOnFailureListener { e ->
+                            // Hide loading state on error
+                            setFormEnabled(true)
+                            progress.visibility = View.GONE
+                            setStatus(e.message ?: "Failed to create post", isError = true)
+                        }
+                }
+
+                val imageUri = selectedImageUri
+                if (imageUri != null) {
+                    setStatus("Uploading image...")
+                    val imageRef = FirebaseStorage.getInstance().reference
+                        .child("post_images/${authorUid}_${System.currentTimeMillis()}.jpg")
+
+                    imageRef.putFile(imageUri)
+                        .addOnSuccessListener {
+                            imageRef.downloadUrl
+                                .addOnSuccessListener { downloadUri ->
+                                    createPostWithImageUrl(downloadUri.toString())
+                                }
+                                .addOnFailureListener {
+                                    // fallback: keep create flow even if URL retrieval fails
+                                    createPostWithImageUrl(imageUri.toString())
+                                }
+                        }
+                        .addOnFailureListener {
+                            // fallback: keep create flow even if upload fails
+                            createPostWithImageUrl(imageUri.toString())
+                        }
+                } else {
+                    createPostWithImageUrl("")
+                }
             }
         }
     }

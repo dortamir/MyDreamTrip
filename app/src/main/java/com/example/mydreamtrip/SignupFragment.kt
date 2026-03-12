@@ -22,6 +22,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
+import androidx.lifecycle.lifecycleScope
+import com.example.mydreamtrip.data.local.UserEntity
+import com.example.mydreamtrip.data.repo.UsersRepository
+import kotlinx.coroutines.launch
 
 class SignupFragment : Fragment(R.layout.fragment_signup) {
 
@@ -58,6 +62,7 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
         val btnPickImage = view.findViewById<FloatingActionButton>(R.id.btnPickImage)
         val btnSignup = view.findViewById<Button>(R.id.btnSignup)
         val progressSignup = view.findViewById<ProgressBar>(R.id.progressSignup)
+        val usersRepo = UsersRepository(requireContext())
 
         var passwordVisible = false
         etPassword.transformationMethod = PasswordTransformationMethod.getInstance()
@@ -174,6 +179,14 @@ class SignupFragment : Fragment(R.layout.fragment_signup) {
                                     .document(user.uid)
                                     .set(userDoc, com.google.firebase.firestore.SetOptions.merge())
                                     .addOnCompleteListener {
+                                        viewLifecycleOwner.lifecycleScope.launch {
+                                            usersRepo.saveUser(UserEntity(
+                                                uid = user.uid,
+                                                name = fullName,
+                                                email = email,
+                                                photoUrl = photoRef
+                                            ))
+                                        }
                                         user.reload().addOnCompleteListener {
                                             val intent = Intent(requireContext(), MainActivity::class.java)
                                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

@@ -10,7 +10,11 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.mydreamtrip.data.local.UserEntity
+import com.example.mydreamtrip.data.repo.UsersRepository
+import kotlinx.coroutines.launch
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textfield.TextInputEditText
@@ -66,6 +70,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         val img = view.findViewById<ShapeableImageView>(R.id.imgProfileEdit)
         val btnSave = view.findViewById<Button>(R.id.btnSaveProfile)
         val progressEditProfile = view.findViewById<ProgressBar>(R.id.progressEditProfile)
+        val usersRepo = UsersRepository(requireContext())
 
         // prefill with current user data (like edit post)
         etName.setText(user.displayName ?: "")
@@ -194,6 +199,14 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
                     .document(reloadedUser.uid)
                     .set(profileData, SetOptions.merge())
                     .addOnSuccessListener {
+                        lifecycleScope.launch {
+                            usersRepo.saveUser(UserEntity(
+                                uid = reloadedUser.uid,
+                                name = displayNameNow,
+                                email = emailNow,
+                                photoUrl = photoRef
+                            ))
+                        }
                         firestore.collection("posts")
                             .whereEqualTo("authorUid", reloadedUser.uid)
                             .get()
