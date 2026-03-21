@@ -83,7 +83,8 @@
                 android:id="@+id/etEmailEdit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress" />
+                android:inputType="textEmailAddress"
+                android:enabled="false" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
